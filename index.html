@@ -3,1201 +3,761 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Caso Práctico: Sistema de Detección de Fraudes con IA - ITIL 4 + PMBOK 7</title>
+    <title>Sistema de Detección de Fraudes con IA - ITIL 4 + PMBOK 7</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
     <style>
-/* Variables CSS */
-:root {
-    --primary-color: #003087;
-    --secondary-color: #0055ff;
-    --accent-color: #00a3e0;
-    --success-color: #28a745;
-    --warning-color: #ffc107;
-    --danger-color: #dc3545;
-    --info-color: #17a2b8;
-    --bg-color: #f8f9fa;
-    --surface-color: #ffffff;
-    --text-primary: #212529;
-    --text-secondary: #6c757d;
-    --border-color: #dee2e6;
-    --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
-    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-    --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
-    --transition: all 0.3s ease;
-    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-}
-
-body.dark-mode {
-    --bg-color: #1a1a1a;
-    --surface-color: #2d2d2d;
-    --text-primary: #ffffff;
-    --text-secondary: #b0b0b0;
-    --border-color: #404040;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: var(--font-primary);
-    background-color: var(--bg-color);
-    color: var(--text-primary);
-    line-height: 1.6;
-    transition: var(--transition);
-}
-
-/* Header */
-.header {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    padding: 1rem 1.5rem;
-    box-shadow: var(--shadow-md);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1400px;
-    margin: 0 auto;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.header-left i {
-    font-size: 1.5rem;
-}
-
-.header-left h1 {
-    font-size: 1.2rem;
-    font-weight: 700;
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.project-day, .current-datetime {
-    font-size: 0.8rem;
-    background: rgba(255,255,255,0.2);
-    padding: 0.4rem 0.8rem;
-    border-radius: 20px;
-}
-
-.theme-toggle {
-    background: rgba(255,255,255,0.2);
-    border: none;
-    color: white;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: var(--transition);
-}
-
-.theme-toggle:hover {
-    background: rgba(255,255,255,0.3);
-    transform: scale(1.1);
-}
-
-/* Simulation Control */
-.simulation-control {
-    background: var(--surface-color);
-    padding: 0.75rem 1.5rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1.5rem;
-    box-shadow: var(--shadow-sm);
-    border-bottom: 3px solid var(--accent-color);
-    flex-wrap: wrap;
-}
-
-.btn-simulation {
-    background: var(--success-color);
-    color: white;
-    border: none;
-    padding: 0.6rem 1.5rem;
-    border-radius: 25px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: var(--transition);
-    box-shadow: var(--shadow-sm);
-}
-
-.btn-simulation:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.btn-simulation.paused {
-    background: var(--warning-color);
-}
-
-.simulation-status {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-}
-
-.status-indicator {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--text-secondary);
-    animation: pulse 2s infinite;
-}
-
-.status-indicator.active {
-    background: var(--success-color);
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
-
-/* Navigation */
-.main-nav {
-    background: var(--surface-color);
-    padding: 0.5rem 1.5rem;
-    display: flex;
-    gap: 0.5rem;
-    overflow-x: auto;
-    box-shadow: var(--shadow-sm);
-}
-
-.nav-tab {
-    background: transparent;
-    border: none;
-    color: var(--text-primary);
-    padding: 0.6rem 1rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: var(--transition);
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.nav-tab:hover {
-    background: var(--bg-color);
-}
-
-.nav-tab.active {
-    background: var(--primary-color);
-    color: white;
-}
-
-/* Sub Navigation */
-.sub-nav {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 2px solid var(--border-color);
-    overflow-x: auto;
-}
-
-.sub-tab {
-    background: transparent;
-    border: none;
-    color: var(--text-primary);
-    padding: 0.6rem 1rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    transition: var(--transition);
-    white-space: nowrap;
-}
-
-.sub-tab:hover {
-    border-bottom-color: var(--accent-color);
-}
-
-.sub-tab.active {
-    color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
-}
-
-/* Main Content */
-.main-content {
-    max-width: 1400px;
-    margin: 1.5rem auto;
-    padding: 0 1.5rem;
-}
-
-.tab-content {
-    display: none;
-    animation: fadeIn 0.3s ease;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-.sub-content {
-    display: none;
-}
-
-.sub-content.active {
-    display: block;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Section Header */
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.section-header h2 {
-    font-size: 1.3rem;
-    color: var(--primary-color);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-/* Buttons */
-.btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-info {
-    border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.btn-primary {
-    background: var(--primary-color);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: var(--secondary-color);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.btn-secondary {
-    background: var(--text-secondary);
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: #5a6268;
-}
-
-.btn-success {
-    background: var(--success-color);
-    color: white;
-}
-
-.btn-success:hover {
-    background: #218838;
-}
-
-.btn-danger {
-    background: var(--danger-color);
-    color: white;
-}
-
-.btn-danger:hover {
-    background: #c82333;
-}
-
-.btn-info {
-    background: var(--info-color);
-    color: white;
-}
-
-.btn-info:hover {
-    background: #138496;
-}
-
-.btn-small {
-    padding: 0.35rem 0.7rem;
-    font-size: 0.75rem;
-}
-
-/* Cards */
-.info-card {
-    background: var(--surface-color);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-}
-
-.info-card:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-}
-
-.info-card h3 {
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-}
-
-.info-card p {
-    color: var(--text-secondary);
-    margin-bottom: 0.75rem;
-    font-size: 0.9rem;
-}
-
-.info-card ul {
-    list-style: none;
-    padding-left: 0;
-}
-
-.info-card ul li {
-    padding: 0.5rem 0;
-    padding-left: 1.5rem;
-    position: relative;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-}
-
-.info-card ul li:before {
-    content: "✓";
-    position: absolute;
-    left: 0;
-    color: var(--success-color);
-    font-weight: bold;
-}
-
-/* Integration Grid */
-.integration-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.integration-item {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    padding: 1.25rem;
-    border-radius: 12px;
-    text-align: center;
-    transition: var(--transition);
-}
-
-.integration-item:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
-}
-
-.integration-item i {
-    font-size: 2rem;
-    margin-bottom: 0.75rem;
-}
-
-.integration-item h4 {
-    margin-bottom: 0.5rem;
-    font-size: 1rem;
-}
-
-.integration-item p {
-    font-size: 0.85rem;
-    opacity: 0.9;
-}
-
-/* Project Progress */
-.project-progress {
-    background: var(--surface-color);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    box-shadow: var(--shadow-sm);
-}
-
-.project-progress h3 {
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-}
-
-.progress-bar-container {
-    background: var(--bg-color);
-    border-radius: 25px;
-    height: 35px;
-    overflow: hidden;
-    position: relative;
-}
-
-.progress-bar {
-    background: linear-gradient(90deg, var(--success-color), var(--accent-color));
-    height: 100%;
-    border-radius: 25px;
-    transition: width 0.5s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 50px;
-}
-
-.progress-text {
-    color: white;
-    font-weight: 700;
-    font-size: 0.9rem;
-}
-
-/* Timeline */
-.timeline-section {
-    background: var(--surface-color);
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: var(--shadow-sm);
-}
-
-.timeline-section h3 {
-    color: var(--primary-color);
-    margin-bottom: 1.5rem;
-}
-
-.timeline {
-    position: relative;
-    padding-left: 2rem;
-}
-
-.timeline:before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: var(--accent-color);
-}
-
-.timeline-item {
-    position: relative;
-    margin-bottom: 1.5rem;
-}
-
-.timeline-marker {
-    position: absolute;
-    left: -2.4rem;
-    top: 0;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: var(--accent-color);
-    border: 3px solid var(--surface-color);
-    box-shadow: var(--shadow-sm);
-}
-
-.timeline-content {
-    padding-left: 1rem;
-}
-
-.timeline-content h4 {
-    color: var(--primary-color);
-    margin-bottom: 0.5rem;
-    font-size: 1rem;
-}
-
-.timeline-content p {
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-}
-
-/* Search Filter */
-.search-filter {
-    margin-bottom: 1rem;
-}
-
-.search-input {
-    width: 100%;
-    max-width: 400px;
-    padding: 0.6rem 1rem;
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 0.85rem;
-    background: var(--surface-color);
-    color: var(--text-primary);
-    transition: var(--transition);
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-}
-
-/* Tables */
-.table-container {
-    background: var(--surface-color);
-    border-radius: 12px;
-    overflow-x: auto;
-    box-shadow: var(--shadow-sm);
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 800px;
-}
-
-thead {
-    background: var(--primary-color);
-    color: white;
-}
-
-thead th {
-    padding: 0.9rem;
-    text-align: left;
-    font-weight: 600;
-    font-size: 0.85rem;
-}
-
-tbody tr {
-    border-bottom: 1px solid var(--border-color);
-    transition: var(--transition);
-}
-
-tbody tr:hover {
-    background: var(--bg-color);
-}
-
-tbody td {
-    padding: 0.9rem;
-    font-size: 0.85rem;
-}
-
-/* Badges */
-.badge {
-    display: inline-block;
-    padding: 0.3rem 0.6rem;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.badge-success {
-    background: #d4edda;
-    color: #155724;
-}
-
-.badge-warning {
-    background: #fff3cd;
-    color: #856404;
-}
-
-.badge-danger {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-.badge-info {
-    background: #d1ecf1;
-    color: #0c5460;
-}
-
-.badge-primary {
-    background: #cce5ff;
-    color: #004085;
-}
-
-/* Metrics Grid */
-.metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.25rem;
-}
-
-.metric-card {
-    background: var(--surface-color);
-    border-radius: 12px;
-    padding: 1.25rem;
-    text-align: center;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-}
-
-.metric-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-md);
-}
-
-.metric-card i {
-    font-size: 2.5rem;
-    color: var(--primary-color);
-    margin-bottom: 0.75rem;
-}
-
-.metric-card h3 {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.5rem;
-}
-
-.metric-value {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--primary-color);
-}
-
-/* Stakeholders Grid */
-.stakeholders-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.25rem;
-}
-
-.stakeholder-card {
-    background: var(--surface-color);
-    border-radius: 12px;
-    padding: 1.25rem;
-    text-align: center;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-}
-
-.stakeholder-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-md);
-}
-
-.stakeholder-card i {
-    font-size: 2.5rem;
-    color: var(--primary-color);
-    margin-bottom: 0.75rem;
-}
-
-.stakeholder-card h3 {
-    color: var(--primary-color);
-    margin-bottom: 0.5rem;
-    font-size: 1rem;
-}
-
-.stakeholder-card p {
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    margin: 0.25rem 0;
-}
-
-/* Charts */
-.charts-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-}
-
-.chart-container {
-    background: var(--surface-color);
-    border-radius: 12px;
-    padding: 1.25rem;
-    box-shadow: var(--shadow-sm);
-    min-height: 350px;
-    display: flex;
-    flex-direction: column;
-}
-
-.chart-container h3 {
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-    font-size: 1rem;
-}
-
-.chart-container canvas {
-    flex: 1;
-    max-height: 300px !important;
-}
-
-/* Knowledge Base */
-.knowledge-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.25rem;
-}
-
-.knowledge-card {
-    background: var(--surface-color);
-    border-radius: 12px;
-    padding: 1.25rem;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-    border-left: 4px solid var(--accent-color);
-}
-
-.knowledge-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-md);
-}
-
-.knowledge-card h3 {
-    color: var(--primary-color);
-    margin-bottom: 0.75rem;
-    font-size: 1rem;
-}
-
-.knowledge-card p {
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    margin-bottom: 0.5rem;
-}
-
-.knowledge-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-color);
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-}
-
-/* Reports Section */
-.reports-section {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1.25rem;
-}
-
-.report-card {
-    background: var(--surface-color);
-    border-radius: 12px;
-    padding: 1.5rem;
-    text-align: center;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-}
-
-.report-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-md);
-}
-
-.report-card i {
-    font-size: 3rem;
-    color: var(--primary-color);
-    margin-bottom: 0.75rem;
-}
-
-.report-card h3 {
-    color: var(--primary-color);
-    margin-bottom: 0.75rem;
-    font-size: 1rem;
-}
-
-.report-card p {
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    margin-bottom: 1.25rem;
-}
-
-/* Risk Detail Modal */
-.risk-detail-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 2000;
-    animation: fadeIn 0.3s ease;
-}
-
-.risk-detail-modal.active {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.risk-detail-content {
-    background: var(--surface-color);
-    border-radius: 12px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow-lg);
-    animation: slideUp 0.3s ease;
-    position: relative;
-}
-
-.risk-detail-header {
-    background: linear-gradient(135deg, var(--danger-color), #ff6b6b);
-    color: white;
-    padding: 1.5rem;
-    border-radius: 12px 12px 0 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.risk-detail-close {
-    background: rgba(255,255,255,0.2);
-    border: none;
-    color: white;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    font-size: 1.5rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition);
-}
-
-.risk-detail-close:hover {
-    background: rgba(255,255,255,0.3);
-    transform: rotate(90deg);
-}
-
-.risk-detail-body {
-    padding: 1.5rem;
-}
-
-.risk-info-item {
-    margin-bottom: 1.25rem;
-    padding-bottom: 1.25rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.risk-info-item:last-child {
-    border-bottom: none;
-}
-
-.risk-info-item h4 {
-    color: var(--primary-color);
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.risk-info-item p {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    line-height: 1.6;
-}
-
-.risk-severity {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 0.85rem;
-}
-
-.risk-severity.high {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-.risk-severity.medium {
-    background: #fff3cd;
-    color: #856404;
-}
-
-.risk-severity.low {
-    background: #d4edda;
-    color: #155724;
-}
-
-/* Modal */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 2000;
-    animation: fadeIn 0.3s ease;
-}
-
-.modal.active {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    background: var(--surface-color);
-    border-radius: 12px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow-lg);
-    animation: slideUp 0.3s ease;
-}
-
-@keyframes slideUp {
-    from { transform: translateY(50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.25rem;
-    border-bottom: 2px solid var(--border-color);
-}
-
-.modal-header h2 {
-    color: var(--primary-color);
-    font-size: 1.2rem;
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 1.75rem;
-    cursor: pointer;
-    color: var(--text-secondary);
-    transition: var(--transition);
-}
-
-.modal-close:hover {
-    color: var(--danger-color);
-}
-
-.modal-body {
-    padding: 1.25rem;
-}
-
-.form-group {
-    margin-bottom: 1.25rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--text-primary);
-    font-weight: 500;
-    font-size: 0.9rem;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-    width: 100%;
-    padding: 0.65rem;
-    border: 2px solid var(--border-color);
-    border-radius: 6px;
-    font-size: 0.85rem;
-    background: var(--surface-color);
-    color: var(--text-primary);
-    transition: var(--transition);
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: var(--primary-color);
-}
-
-.form-group textarea {
-    resize: vertical;
-    min-height: 80px;
-}
-
-/* Toast Notifications */
-.toast-container {
-    position: fixed;
-    top: 80px;
-    right: 20px;
-    z-index: 3000;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.toast {
-    background: var(--surface-color);
-    padding: 0.9rem 1.25rem;
-    border-radius: 8px;
-    box-shadow: var(--shadow-lg);
-    min-width: 280px;
-    display: flex;
-    align-items: center;
-    gap: 0.9rem;
-    animation: slideInRight 0.3s ease;
-    border-left: 4px solid var(--primary-color);
-}
-
-@keyframes slideInRight {
-    from { transform: translateX(400px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-.toast.success {
-    border-left-color: var(--success-color);
-}
-
-.toast.warning {
-    border-left-color: var(--warning-color);
-}
-
-.toast.error {
-    border-left-color: var(--danger-color);
-}
-
-.toast i {
-    font-size: 1.3rem;
-}
-
-.toast.success i {
-    color: var(--success-color);
-}
-
-.toast.warning i {
-    color: var(--warning-color);
-}
-
-.toast.error i {
-    color: var(--danger-color);
-}
-
-.toast-message {
-    flex: 1;
-    color: var(--text-primary);
-    font-size: 0.85rem;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .header-left h1 {
-        font-size: 1rem;
-    }
-    
-    .header-left i {
-        font-size: 1.2rem;
-    }
-    
-    .project-day, .current-datetime {
-        font-size: 0.7rem;
-        padding: 0.3rem 0.6rem;
-    }
-    
-    .theme-toggle {
-        width: 32px;
-        height: 32px;
-    }
-    
-    .main-nav {
-        padding: 0.5rem;
-    }
-    
-    .nav-tab {
-        padding: 0.5rem 0.8rem;
-        font-size: 0.8rem;
-    }
-    
-    .charts-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .integration-grid,
-    .metrics-grid,
-    .stakeholders-grid,
-    .reports-section {
-        grid-template-columns: 1fr;
-    }
-    
-    .section-header h2 {
-        font-size: 1.1rem;
-    }
-    
-    .simulation-control {
-        padding: 0.6rem 1rem;
-    }
-    
-    .btn-simulation {
-        font-size: 0.8rem;
-        padding: 0.5rem 1rem;
-    }
-    
-    .toast-container {
-        right: 10px;
-        left: 10px;
-    }
-    
-    .toast {
-        min-width: auto;
-    }
-    
-    table {
-        min-width: 600px;
-        font-size: 0.75rem;
-    }
-    
-    thead th, tbody td {
-        padding: 0.6rem;
-    }
-}
-
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--bg-color);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
-    border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--secondary-color);
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #003087, #0055ff);
+            color: white;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-left h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .project-info {
+            font-size: 0.85rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        .theme-toggle {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .simulation-control {
+            background: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-bottom: 4px solid #0055ff;
+        }
+
+        body.dark-mode .simulation-control {
+            background: #2d2d2d;
+        }
+
+        .btn-simulation {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 25px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-simulation:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-simulation.paused {
+            background: #ffc107;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.inactive {
+            background: #6c757d;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .main-nav {
+            background: white;
+            padding: 0.5rem 1.5rem;
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode .main-nav {
+            background: #2d2d2d;
+        }
+
+        .nav-tab {
+            background: transparent;
+            border: none;
+            color: #212529;
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        body.dark-mode .nav-tab {
+            color: #b0b0b0;
+        }
+
+        .nav-tab:hover {
+            background: #f8f9fa;
+        }
+
+        body.dark-mode .nav-tab:hover {
+            background: #404040;
+        }
+
+        .nav-tab.active {
+            background: #0055ff;
+            color: white;
+        }
+
+        .main-content {
+            max-width: 1400px;
+            margin: 1.5rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .sub-nav {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #dee2e6;
+            overflow-x: auto;
+        }
+
+        .sub-tab {
+            background: transparent;
+            border: none;
+            color: #212529;
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        body.dark-mode .sub-tab {
+            color: #b0b0b0;
+        }
+
+        .sub-tab:hover {
+            border-bottom-color: #00a3e0;
+        }
+
+        .sub-tab.active {
+            color: #0055ff;
+            border-bottom-color: #0055ff;
+        }
+
+        .sub-content {
+            display: none;
+        }
+
+        .sub-content.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .card {
+            background: #2d2d2d;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            color: #0055ff;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: #0055ff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #0055ff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #003087;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        .integration-card {
+            background: linear-gradient(135deg, #003087, #0055ff);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .integration-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .integration-card h4 {
+            margin: 1rem 0 0.5rem 0;
+            font-size: 1.1rem;
+        }
+
+        .integration-card p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .progress-container {
+            background: #e9ecef;
+            border-radius: 25px;
+            height: 40px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #28a745, #00a3e0);
+            height: 100%;
+            border-radius: 25px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 50px;
+        }
+
+        .progress-text {
+            color: white;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .search-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.7rem 1rem;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: white;
+            color: #212529;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        body.dark-mode .search-input {
+            background: #2d2d2d;
+            color: white;
+            border-color: #404040;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #0055ff;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            overflow-x: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode .table-container {
+            background: #2d2d2d;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        thead {
+            background: #0055ff;
+            color: white;
+        }
+
+        thead th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode tbody tr {
+            border-bottom-color: #404040;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        body.dark-mode tbody tr:hover {
+            background: #404040;
+        }
+
+        tbody td {
+            padding: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.7rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .badge-primary {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .metric-card {
+            background: #2d2d2d;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0055ff;
+            margin-top: 0.5rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        body.dark-mode .modal-content {
+            background: #2d2d2d;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #dc3545, #ff6b6b);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .risk-info-item {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        body.dark-mode .risk-info-item {
+            border-bottom-color: #404040;
+        }
+
+        .risk-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .risk-info-item h4 {
+            color: #0055ff;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            min-width: 300px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideInRight 0.3s ease;
+            border-left: 4px solid #0055ff;
+        }
+
+        body.dark-mode .toast {
+            background: #2d2d2d;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.success {
+            border-left-color: #28a745;
+        }
+
+        .toast.warning {
+            border-left-color: #ffc107;
+        }
+
+        .toast.error {
+            border-left-color: #dc3545;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-height: 400px;
+        }
+
+        body.dark-mode .chart-container {
+            background: #2d2d2d;
+        }
+
+        .knowledge-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid #00a3e0;
+        }
+
+        body.dark-mode .knowledge-card {
+            background: #2d2d2d;
+        }
+
+        .knowledge-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .report-card {
+            background: #2d2d2d;
+        }
+
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .stakeholder-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .stakeholder-card {
+            background: #2d2d2d;
+        }
+
+        .stakeholder-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        @media (max-width: 768px) {
+            .header-left h1 {
+                font-size: 1rem;
+            }
+
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                min-width: 600px;
+                font-size: 0.75rem;
+            }
+
+            thead th, tbody td {
+                padding: 0.6rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1205,15 +765,15 @@ tbody td {
     <header class="header">
         <div class="header-content">
             <div class="header-left">
-                <i class="fas fa-shield-alt"></i>
+                <span style="font-size: 1.5rem;">🛡️</span>
                 <h1>Sistema de Detección de Fraudes con IA</h1>
             </div>
             <div class="header-right">
-                <span class="project-day">Día del proyecto: <strong id="projectDay">1</strong></span>
-                <span class="current-datetime" id="currentDateTime"></span>
-                <button class="theme-toggle" id="themeToggle">
-                    <i class="fas fa-moon"></i>
-                </button>
+                <span class="project-info">
+                    Día del proyecto: <strong id="projectDay">1</strong>
+                </span>
+                <span class="project-info" id="currentDateTime"></span>
+                <button class="theme-toggle" id="themeToggle">🌙</button>
             </div>
         </div>
     </header>
@@ -1221,129 +781,72 @@ tbody td {
     <!-- Simulation Control -->
     <div class="simulation-control">
         <button class="btn-simulation" id="simulationToggle">
-            <i class="fas fa-pause"></i>
-            <span>Pausar Simulación</span>
+            <span id="simIcon">⏸️</span>
+            <span id="simText">Pausar Simulación</span>
         </button>
-        <div class="simulation-status">
-            <span class="status-indicator active"></span>
-            <span>Simulación activa - Nuevo registro cada 5 segundos</span>
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+            <span class="status-indicator" id="statusIndicator"></span>
+            <span id="statusText">Simulación activa - Nuevo registro cada 5 segundos</span>
         </div>
     </div>
 
-    <!-- Navigation Tabs -->
+    <!-- Navigation -->
     <nav class="main-nav">
-        <button class="nav-tab active" data-tab="inicio">
-            <i class="fas fa-home"></i> Inicio
-        </button>
-        <button class="nav-tab" data-tab="itil">
-            <i class="fas fa-cogs"></i> Gestión ITIL
-        </button>
-        <button class="nav-tab" data-tab="pmbok">
-            <i class="fas fa-tasks"></i> Gestión PMBOK
-        </button>
-        <button class="nav-tab" data-tab="dashboard">
-            <i class="fas fa-chart-line"></i> Dashboard
-        </button>
-        <button class="nav-tab" data-tab="conocimiento">
-            <i class="fas fa-book"></i> Base de Conocimientos
-        </button>
-        <button class="nav-tab" data-tab="reportes">
-            <i class="fas fa-file-download"></i> Reportes
-        </button>
+        <button class="nav-tab active" data-tab="inicio">🏠 Inicio</button>
+        <button class="nav-tab" data-tab="itil">⚙️ Gestión ITIL</button>
+        <button class="nav-tab" data-tab="pmbok">📋 Gestión PMBOK</button>
+        <button class="nav-tab" data-tab="dashboard">📊 Dashboard</button>
+        <button class="nav-tab" data-tab="conocimiento">📚 Base de Conocimientos</button>
+        <button class="nav-tab" data-tab="reportes">📥 Reportes</button>
     </nav>
 
     <!-- Main Content -->
     <main class="main-content">
         <!-- Inicio Tab -->
         <section class="tab-content active" id="inicio">
-            <div class="welcome-section">
-                <h2><i class="fas fa-brain"></i> Proyecto de Implementación de Sistema de Detección de Fraudes con IA</h2>
-                <div class="project-info">
-                    <div class="info-card">
-                        <h3>Contexto del Proyecto</h3>
-                        <p>Banco Nacional S.A. ha iniciado un proyecto estratégico para implementar un sistema de detección de fraudes utilizando Machine Learning e Inteligencia Artificial. El objetivo es reducir las pérdidas por transacciones fraudulentas en un 85% durante el primer año de operación.</p>
-                        <p>Este proyecto integra las mejores prácticas de <strong>ITIL 4</strong> para la gestión de servicios TI y el marco <strong>PMBOK 7ma edición</strong> para la dirección de proyectos, asegurando una implementación exitosa y sostenible.</p>
-                    </div>
-                    
-                    <div class="info-card">
-                        <h3>Alcance y Objetivos</h3>
-                        <ul>
-                            <li><strong>Desarrollar modelo de ML:</strong> Random Forest y Redes Neuronales para detección en tiempo real</li>
-                            <li><strong>Integración:</strong> Sistema core bancario, canales digitales y ATMs</li>
-                            <li><strong>Infraestructura:</strong> Cloud híbrida con alta disponibilidad (99.95%)</li>
-                            <li><strong>Cumplimiento:</strong> ISO 27001, PCI DSS, normativas bancarias locales</li>
-                            <li><strong>Equipo:</strong> 15 profesionales (Data Scientists, DevOps, Analistas, QA)</li>
-                        </ul>
-                    </div>
+            <h2 style="font-size: 2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                🛡️ Proyecto de Implementación de Sistema de Detección de Fraudes con IA
+            </h2>
+            
+            <div class="card">
+                <h3>Contexto del Proyecto</h3>
+                <p style="color: #6c757d; margin-bottom: 1rem;">
+                    Banco Nacional S.A. ha iniciado un proyecto estratégico para implementar un sistema de detección de fraudes utilizando Machine Learning e Inteligencia Artificial. El objetivo es reducir las pérdidas por transacciones fraudulentas en un 85% durante el primer año de operación.
+                </p>
+                <p style="color: #6c757d;">
+                    Este proyecto integra las mejores prácticas de <strong>ITIL 4</strong> para la gestión de servicios TI y el marco <strong>PMBOK 7ma edición</strong> para la dirección de proyectos, asegurando una implementación exitosa y sostenible.
+                </p>
+            </div>
 
-                    <div class="info-card">
-                        <h3>Integración ITIL 4 + PMBOK 7</h3>
-                        <div class="integration-grid">
-                            <div class="integration-item">
-                                <i class="fas fa-ticket-alt"></i>
-                                <h4>Gestión de Incidentes</h4>
-                                <p>Monitoreo 24/7 de alertas del modelo, falsos positivos, caídas del servicio</p>
-                            </div>
-                            <div class="integration-item">
-                                <i class="fas fa-tools"></i>
-                                <h4>Gestión de Problemas</h4>
-                                <p>Análisis de causa raíz de degradación del modelo, sesgo algorítmico</p>
-                            </div>
-                            <div class="integration-item">
-                                <i class="fas fa-exchange-alt"></i>
-                                <h4>Gestión de Cambios</h4>
-                                <p>CAB para actualizaciones del modelo, nuevas features, patches</p>
-                            </div>
-                            <div class="integration-item">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <h4>Gestión de Riesgos</h4>
-                                <p>Identificación y mitigación de riesgos técnicos, regulatorios, operacionales</p>
-                            </div>
-                        </div>
+            <div class="card">
+                <h3>Progreso General del Proyecto</h3>
+                <div class="progress-container">
+                    <div class="progress-bar" id="projectProgress" style="width: 0%">
+                        <span class="progress-text">0%</span>
                     </div>
                 </div>
+            </div>
 
-                <div class="project-progress">
-                    <h3>Progreso General del Proyecto</h3>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" id="projectProgress">
-                            <span class="progress-text">0%</span>
-                        </div>
-                    </div>
+            <div class="grid grid-4">
+                <div class="integration-card">
+                    <div style="font-size: 2.5rem;">🎫</div>
+                    <h4>Gestión de Incidentes</h4>
+                    <p>Monitoreo 24/7 de alertas del modelo</p>
                 </div>
-
-                <div class="timeline-section">
-                    <h3>Línea de Tiempo del Proyecto</h3>
-                    <div class="timeline">
-                        <div class="timeline-item">
-                            <div class="timeline-marker"></div>
-                            <div class="timeline-content">
-                                <h4>Fase 1: Iniciación y Planificación</h4>
-                                <p>Semanas 1-4: Definición de requisitos, conformación de equipo, análisis de datos históricos</p>
-                            </div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-marker"></div>
-                            <div class="timeline-content">
-                                <h4>Fase 2: Desarrollo del Modelo</h4>
-                                <p>Semanas 5-12: Entrenamiento de modelos, validación, ajuste de hiperparámetros</p>
-                            </div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-marker"></div>
-                            <div class="timeline-content">
-                                <h4>Fase 3: Integración y Testing</h4>
-                                <p>Semanas 13-18: Integración con sistemas core, pruebas UAT, stress testing</p>
-                            </div>
-                        </div>
-                        <div class="timeline-item">
-                            <div class="timeline-marker"></div>
-                            <div class="timeline-content">
-                                <h4>Fase 4: Despliegue y Monitoreo</h4>
-                                <p>Semanas 19-24: Go-live progresivo, monitoreo continuo, ajustes post-implementación</p>
-                            </div>
-                        </div>
-                    </div>
+                <div class="integration-card">
+                    <div style="font-size: 2.5rem;">🔧</div>
+                    <h4>Gestión de Problemas</h4>
+                    <p>Análisis de causa raíz de degradación</p>
+                </div>
+                <div class="integration-card">
+                    <div style="font-size: 2.5rem;">🔄</div>
+                    <h4>Gestión de Cambios</h4>
+                    <p>CAB para actualizaciones del modelo</p>
+                </div>
+                <div class="integration-card">
+                    <div style="font-size: 2.5rem;">⚠️</div>
+                    <h4>Gestión de Riesgos</h4>
+                    <p>Identificación y mitigación de riesgos</p>
                 </div>
             </div>
         </section>
@@ -1351,25 +854,20 @@ tbody td {
         <!-- ITIL Tab -->
         <section class="tab-content" id="itil">
             <div class="sub-nav">
-                <button class="sub-tab active" data-subtab="incidentes">Incidentes</button>
-                <button class="sub-tab" data-subtab="problemas">Problemas</button>
-                <button class="sub-tab" data-subtab="cambios">Cambios</button>
-                <button class="sub-tab" data-subtab="servicedesk">Service Desk</button>
+                <button class="sub-tab active" data-subtab="incidentes" data-parent="itil">Incidentes</button>
+                <button class="sub-tab" data-subtab="problemas" data-parent="itil">Problemas</button>
+                <button class="sub-tab" data-subtab="cambios" data-parent="itil">Cambios</button>
+                <button class="sub-tab" data-subtab="servicedesk" data-parent="itil">Service Desk</button>
             </div>
 
             <!-- Incidentes -->
             <div class="sub-content active" id="incidentes">
                 <div class="section-header">
-                    <h2><i class="fas fa-exclamation-circle"></i> Gestión de Incidentes ITIL 4</h2>
-                    <button class="btn-primary" onclick="showAddForm('incidente')">
-                        <i class="fas fa-plus"></i> Nuevo Incidente
-                    </button>
+                    <h2>🎫 Gestión de Incidentes ITIL 4</h2>
                 </div>
-                <div class="search-filter">
-                    <input type="text" placeholder="Buscar incidentes..." class="search-input" onkeyup="filterTable('incidentesTable', this.value)">
-                </div>
+                <input type="text" placeholder="Buscar incidentes..." class="search-input" id="searchIncidentes">
                 <div class="table-container">
-                    <table id="incidentesTable">
+                    <table>
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -1389,16 +887,10 @@ tbody td {
             <!-- Problemas -->
             <div class="sub-content" id="problemas">
                 <div class="section-header">
-                    <h2><i class="fas fa-tools"></i> Gestión de Problemas ITIL 4</h2>
-                    <button class="btn-primary" onclick="showAddForm('problema')">
-                        <i class="fas fa-plus"></i> Nuevo Problema
-                    </button>
-                </div>
-                <div class="search-filter">
-                    <input type="text" placeholder="Buscar problemas..." class="search-input" onkeyup="filterTable('problemasTable', this.value)">
+                    <h2>🔧 Gestión de Problemas ITIL 4</h2>
                 </div>
                 <div class="table-container">
-                    <table id="problemasTable">
+                    <table>
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -1418,16 +910,10 @@ tbody td {
             <!-- Cambios -->
             <div class="sub-content" id="cambios">
                 <div class="section-header">
-                    <h2><i class="fas fa-exchange-alt"></i> Gestión de Cambios (CAB)</h2>
-                    <button class="btn-primary" onclick="showAddForm('cambio')">
-                        <i class="fas fa-plus"></i> Nuevo Cambio
-                    </button>
-                </div>
-                <div class="search-filter">
-                    <input type="text" placeholder="Buscar cambios..." class="search-input" onkeyup="filterTable('cambiosTable', this.value)">
+                    <h2>🔄 Gestión de Cambios (CAB)</h2>
                 </div>
                 <div class="table-container">
-                    <table id="cambiosTable">
+                    <table>
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -1447,28 +933,28 @@ tbody td {
             <!-- Service Desk -->
             <div class="sub-content" id="servicedesk">
                 <div class="section-header">
-                    <h2><i class="fas fa-headset"></i> Service Desk - Métricas</h2>
+                    <h2>👥 Service Desk - Métricas</h2>
                 </div>
-                <div class="metrics-grid">
+                <div class="grid grid-4">
                     <div class="metric-card">
-                        <i class="fas fa-clock"></i>
-                        <h3>Tiempo Promedio de Resolución</h3>
-                        <p class="metric-value" id="avgResolutionTime">2.5 horas</p>
+                        <div style="font-size: 2.5rem; color: #0055ff;">⏱️</div>
+                        <h3 style="font-size: 0.85rem; color: #6c757d; margin: 0.5rem 0;">Tiempo Promedio de Resolución</h3>
+                        <p class="metric-value" id="avgResolutionTime">0 horas</p>
                     </div>
                     <div class="metric-card">
-                        <i class="fas fa-check-circle"></i>
-                        <h3>Tasa de Resolución Primer Contacto</h3>
-                        <p class="metric-value" id="firstContactResolution">78%</p>
+                        <div style="font-size: 2.5rem; color: #28a745;">✅</div>
+                        <h3 style="font-size: 0.85rem; color: #6c757d; margin: 0.5rem 0;">Resolución Primer Contacto</h3>
+                        <p class="metric-value" id="firstContactResolution">0%</p>
                     </div>
                     <div class="metric-card">
-                        <i class="fas fa-star"></i>
-                        <h3>Satisfacción del Usuario</h3>
-                        <p class="metric-value" id="userSatisfaction">4.6/5.0</p>
+                        <div style="font-size: 2.5rem; color: #ffc107;">⭐</div>
+                        <h3 style="font-size: 0.85rem; color: #6c757d; margin: 0.5rem 0;">Satisfacción del Usuario</h3>
+                        <p class="metric-value" id="userSatisfaction">0/5.0</p>
                     </div>
                     <div class="metric-card">
-                        <i class="fas fa-ticket-alt"></i>
-                        <h3>Incidentes Activos</h3>
-                        <p class="metric-value" id="activeIncidents">12</p>
+                        <div style="font-size: 2.5rem; color: #dc3545;">🎫</div>
+                        <h3 style="font-size: 0.85rem; color: #6c757d; margin: 0.5rem 0;">Incidentes Activos</h3>
+                        <p class="metric-value" id="activeIncidents">0</p>
                     </div>
                 </div>
             </div>
@@ -1477,25 +963,19 @@ tbody td {
         <!-- PMBOK Tab -->
         <section class="tab-content" id="pmbok">
             <div class="sub-nav">
-                <button class="sub-tab active" data-subtab="riesgos">Riesgos</button>
-                <button class="sub-tab" data-subtab="hitos">Hitos</button>
-                <button class="sub-tab" data-subtab="lecciones">Lecciones Aprendidas</button>
-                <button class="sub-tab" data-subtab="interesados">Interesados</button>
+                <button class="sub-tab active" data-subtab="riesgos" data-parent="pmbok">Riesgos</button>
+                <button class="sub-tab" data-subtab="hitos" data-parent="pmbok">Hitos</button>
+                <button class="sub-tab" data-subtab="lecciones" data-parent="pmbok">Lecciones Aprendidas</button>
+                <button class="sub-tab" data-subtab="interesados" data-parent="pmbok">Interesados</button>
             </div>
 
             <!-- Riesgos -->
             <div class="sub-content active" id="riesgos">
                 <div class="section-header">
-                    <h2><i class="fas fa-exclamation-triangle"></i> Gestión de Riesgos PMBOK 7</h2>
-                    <button class="btn-primary" onclick="showAddForm('riesgo')">
-                        <i class="fas fa-plus"></i> Nuevo Riesgo
-                    </button>
-                </div>
-                <div class="search-filter">
-                    <input type="text" placeholder="Buscar riesgos..." class="search-input" onkeyup="filterTable('riesgosTable', this.value)">
+                    <h2>⚠️ Gestión de Riesgos PMBOK 7</h2>
                 </div>
                 <div class="table-container">
-                    <table id="riesgosTable">
+                    <table>
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -1515,16 +995,10 @@ tbody td {
             <!-- Hitos -->
             <div class="sub-content" id="hitos">
                 <div class="section-header">
-                    <h2><i class="fas fa-flag-checkered"></i> Hitos del Proyecto</h2>
-                    <button class="btn-primary" onclick="showAddForm('hito')">
-                        <i class="fas fa-plus"></i> Nuevo Hito
-                    </button>
-                </div>
-                <div class="search-filter">
-                    <input type="text" placeholder="Buscar hitos..." class="search-input" onkeyup="filterTable('hitosTable', this.value)">
+                    <h2>🏁 Hitos del Proyecto</h2>
                 </div>
                 <div class="table-container">
-                    <table id="hitosTable">
+                    <table>
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -1541,19 +1015,13 @@ tbody td {
                 </div>
             </div>
 
-            <!-- Lecciones Aprendidas -->
+            <!-- Lecciones -->
             <div class="sub-content" id="lecciones">
                 <div class="section-header">
-                    <h2><i class="fas fa-lightbulb"></i> Lecciones Aprendidas</h2>
-                    <button class="btn-primary" onclick="showAddForm('leccion')">
-                        <i class="fas fa-plus"></i> Nueva Lección
-                    </button>
-                </div>
-                <div class="search-filter">
-                    <input type="text" placeholder="Buscar lecciones..." class="search-input" onkeyup="filterTable('leccionesTable', this.value)">
+                    <h2>💡 Lecciones Aprendidas</h2>
                 </div>
                 <div class="table-container">
-                    <table id="leccionesTable">
+                    <table>
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -1572,49 +1040,49 @@ tbody td {
             <!-- Interesados -->
             <div class="sub-content" id="interesados">
                 <div class="section-header">
-                    <h2><i class="fas fa-users"></i> Gestión de Interesados</h2>
+                    <h2>👥 Gestión de Interesados</h2>
                 </div>
-                <div class="stakeholders-grid">
+                <div class="grid grid-3">
                     <div class="stakeholder-card">
-                        <i class="fas fa-user-tie"></i>
+                        <div style="font-size: 2.5rem;">👔</div>
                         <h3>Sponsor Ejecutivo</h3>
                         <p><strong>Gerente General</strong></p>
-                        <p>Interés: Alto | Poder: Alto</p>
+                        <p style="font-size: 0.85rem; color: #6c757d;">Interés: Alto | Poder: Alto</p>
                         <span class="badge badge-success">Comprometido</span>
                     </div>
                     <div class="stakeholder-card">
-                        <i class="fas fa-user-shield"></i>
+                        <div style="font-size: 2.5rem;">🛡️</div>
                         <h3>Director de TI</h3>
                         <p><strong>CIO</strong></p>
-                        <p>Interés: Alto | Poder: Alto</p>
+                        <p style="font-size: 0.85rem; color: #6c757d;">Interés: Alto | Poder: Alto</p>
                         <span class="badge badge-success">Comprometido</span>
                     </div>
                     <div class="stakeholder-card">
-                        <i class="fas fa-user-cog"></i>
+                        <div style="font-size: 2.5rem;">👨‍💻</div>
                         <h3>Equipo de Desarrollo</h3>
                         <p><strong>15 profesionales</strong></p>
-                        <p>Interés: Alto | Poder: Medio</p>
+                        <p style="font-size: 0.85rem; color: #6c757d;">Interés: Alto | Poder: Medio</p>
                         <span class="badge badge-primary">Participativo</span>
                     </div>
                     <div class="stakeholder-card">
-                        <i class="fas fa-user-check"></i>
+                        <div style="font-size: 2.5rem;">✅</div>
                         <h3>Área de Cumplimiento</h3>
                         <p><strong>Compliance Officer</strong></p>
-                        <p>Interés: Alto | Poder: Alto</p>
+                        <p style="font-size: 0.85rem; color: #6c757d;">Interés: Alto | Poder: Alto</p>
                         <span class="badge badge-warning">Neutral</span>
                     </div>
                     <div class="stakeholder-card">
-                        <i class="fas fa-user-secret"></i>
+                        <div style="font-size: 2.5rem;">🔐</div>
                         <h3>Área de Seguridad</h3>
                         <p><strong>CISO</strong></p>
-                        <p>Interés: Alto | Poder: Alto</p>
+                        <p style="font-size: 0.85rem; color: #6c757d;">Interés: Alto | Poder: Alto</p>
                         <span class="badge badge-success">Comprometido</span>
                     </div>
                     <div class="stakeholder-card">
-                        <i class="fas fa-user-friends"></i>
+                        <div style="font-size: 2.5rem;">👥</div>
                         <h3>Usuarios Finales</h3>
                         <p><strong>Analistas de Fraude</strong></p>
-                        <p>Interés: Alto | Poder: Bajo</p>
+                        <p style="font-size: 0.85rem; color: #6c757d;">Interés: Alto | Poder: Bajo</p>
                         <span class="badge badge-primary">Participativo</span>
                     </div>
                 </div>
@@ -1624,35 +1092,17 @@ tbody td {
         <!-- Dashboard Tab -->
         <section class="tab-content" id="dashboard">
             <div class="section-header">
-                <h2><i class="fas fa-chart-line"></i> Dashboard de Indicadores</h2>
-                <button class="btn-secondary" onclick="updateAllCharts()">
-                    <i class="fas fa-sync-alt"></i> Actualizar Gráficos
-                </button>
+                <h2>📊 Dashboard de Indicadores</h2>
             </div>
-            <div class="charts-grid">
+            
+            <div class="grid grid-2">
                 <div class="chart-container">
-                    <h3>Incidentes por Severidad</h3>
+                    <h3 style="margin-bottom: 1rem;">Incidentes por Severidad</h3>
                     <canvas id="incidentsSeverityChart"></canvas>
                 </div>
                 <div class="chart-container">
-                    <h3>Estado de Cambios</h3>
+                    <h3 style="margin-bottom: 1rem;">Estado de Cambios</h3>
                     <canvas id="changesStatusChart"></canvas>
-                </div>
-                <div class="chart-container">
-                    <h3>Evolución de Riesgos Activos</h3>
-                    <canvas id="risksTimelineChart"></canvas>
-                </div>
-                <div class="chart-container">
-                    <h3>Distribución PMBOK (Áreas de Conocimiento)</h3>
-                    <canvas id="pmbokAreasChart"></canvas>
-                </div>
-                <div class="chart-container">
-                    <h3>Incidentes: Resueltos vs Pendientes</h3>
-                    <canvas id="incidentsResolvedChart"></canvas>
-                </div>
-                <div class="chart-container">
-                    <h3>Madurez de Prácticas ITIL 4</h3>
-                    <canvas id="itilMaturityChart"></canvas>
                 </div>
             </div>
         </section>
@@ -1660,2260 +1110,851 @@ tbody td {
         <!-- Base de Conocimientos Tab -->
         <section class="tab-content" id="conocimiento">
             <div class="section-header">
-                <h2><i class="fas fa-book"></i> Base de Conocimientos</h2>
-                <button class="btn-primary" onclick="showAddForm('conocimiento')">
-                    <i class="fas fa-plus"></i> Nuevo Artículo
-                </button>
+                <h2>📚 Base de Conocimientos</h2>
             </div>
-            <div class="search-filter">
-                <input type="text" placeholder="Buscar artículos..." class="search-input" onkeyup="filterKnowledge(this.value)">
-            </div>
-            <div class="knowledge-grid" id="knowledgeGrid"></div>
+            <div class="grid grid-3" id="knowledgeGrid"></div>
         </section>
 
         <!-- Reportes Tab -->
         <section class="tab-content" id="reportes">
             <div class="section-header">
-                <h2><i class="fas fa-file-download"></i> Exportar Reportes</h2>
+                <h2>📥 Exportar Reportes</h2>
             </div>
-            <div class="reports-section">
+            
+            <div class="grid grid-3">
                 <div class="report-card">
-                    <i class="fas fa-file-code"></i>
-                    <h3>Exportar Datos Completos (JSON)</h3>
-                    <p>Descarga todos los datos del proyecto en formato JSON para respaldo o análisis externo</p>
-                    <button class="btn-primary" onclick="exportJSON()">
-                        <i class="fas fa-download"></i> Descargar JSON
-                    </button>
+                    <div style="font-size: 3rem; color: #0055ff; margin-bottom: 1rem;">📄</div>
+                    <h3>Exportar Datos (JSON)</h3>
+                    <p style="color: #6c757d; margin: 1rem 0;">Descarga todos los datos del proyecto en formato JSON</p>
+                    <button class="btn btn-primary" id="btnExportJSON">📥 Descargar JSON</button>
                 </div>
+
                 <div class="report-card">
-                    <i class="fas fa-file-csv"></i>
-                    <h3>Exportar Datos (CSV)</h3>
-                    <p>Descarga todos los registros en formato CSV compatible con Excel</p>
-                    <button class="btn-primary" onclick="exportCSV()">
-                        <i class="fas fa-download"></i> Descargar CSV
-                    </button>
-                </div>
-                <div class="report-card">
-                    <i class="fas fa-file-import"></i>
-                    <h3>Importar Datos (JSON)</h3>
-                    <p>Carga datos previamente exportados para restaurar el estado del proyecto</p>
-                    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
-                    <button class="btn-secondary" onclick="document.getElementById('importFile').click()">
-                        <i class="fas fa-upload"></i> Importar JSON
-                    </button>
-                </div>
-                <div class="report-card">
-                    <i class="fas fa-database"></i>
+                    <div style="font-size: 3rem; color: #28a745; margin-bottom: 1rem;">💾</div>
                     <h3>Cargar Datos de Ejemplo</h3>
-                    <p>Carga 20 registros iniciales realistas para comenzar la simulación</p>
-                    <button class="btn-success" onclick="loadSampleData()">
-                        <i class="fas fa-play-circle"></i> Cargar Datos
-                    </button>
+                    <p style="color: #6c757d; margin: 1rem 0;">Carga 20 registros iniciales para comenzar</p>
+                    <button class="btn btn-success" id="btnLoadSample">▶️ Cargar Datos</button>
                 </div>
+
                 <div class="report-card">
-                    <i class="fas fa-trash-alt"></i>
+                    <div style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;">🗑️</div>
                     <h3>Limpiar Todos los Datos</h3>
-                    <p>Elimina todos los registros y reinicia el proyecto (acción irreversible)</p>
-                    <button class="btn-danger" onclick="clearAllData()">
-                        <i class="fas fa-exclamation-triangle"></i> Limpiar Todo
-                    </button>
+                    <p style="color: #6c757d; margin: 1rem 0;">Elimina todos los registros (irreversible)</p>
+                    <button class="btn btn-danger" id="btnClearAll">⚠️ Limpiar Todo</button>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- Modal para Formularios -->
-    <div class="modal" id="formModal">
+    <!-- Modal de Detalle de Riesgo -->
+    <div class="modal" id="riskDetailModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalTitle"></h2>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
+                <h2 style="display: flex; align-items: center; gap: 0.5rem;">⚠️ Detalle del Riesgo</h2>
+                <button class="modal-close" id="btnCloseModal">×</button>
             </div>
-            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-body" id="riskDetailBody"></div>
         </div>
     </div>
 
-    <!-- Modal para Detalles de Riesgo -->
-    <div class="risk-detail-modal" id="riskDetailModal">
-        <div class="risk-detail-content">
-            <div class="risk-detail-header">
-                <h2><i class="fas fa-exclamation-triangle"></i> Detalle del Riesgo</h2>
-                <button class="risk-detail-close" onclick="closeRiskDetail()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="risk-detail-body" id="riskDetailBody"></div>
-        </div>
-    </div>
-
-    <!-- Toast Notifications -->
+    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
-// ===================================
-// VARIABLES GLOBALES
-// ===================================
-let simulationActive = true;
-let simulationInterval = null;
-let projectDay = 1;
-let projectDayInterval = null;
-let allData = {
-    incidentes: [],
-    problemas: [],
-    cambios: [],
-    riesgos: [],
-    hitos: [],
-    lecciones: [],
-    conocimientos: []
-};
+        // Variables globales
+        let simulationActive = true;
+        let projectDay = 1;
+        let simulationInterval = null;
+        let dayInterval = null;
+        let allData = {
+            incidentes: [],
+            problemas: [],
+            cambios: [],
+            riesgos: [],
+            hitos: [],
+            lecciones: [],
+            conocimientos: []
+        };
 
-// ===================================
-// DATOS DE EJEMPLO REALISTAS
-// ===================================
-const sampleIncidents = [
-    "Caída del servicio de predicción de fraude en producción",
-    "Falsos positivos elevados (15%) en transacciones internacionales",
-    "Tiempo de respuesta del modelo > 3 segundos (SLA: 1s)",
-    "Error en la integración con API del core bancario",
-    "Alertas duplicadas enviadas a clientes legítimos",
-    "Degradación del rendimiento en horario pico",
-    "Fallo en el servicio de autenticación biométrica",
-    "Inconsistencia en datos entre staging y producción"
-];
+        // Datos de ejemplo
+        const sampleIncidents = [
+            "Caída del servicio de predicción de fraude en producción",
+            "Falsos positivos elevados (15%) en transacciones internacionales",
+            "Tiempo de respuesta del modelo > 3 segundos (SLA: 1s)",
+            "Error en la integración con API del core bancario",
+            "Alertas duplicadas enviadas a clientes legítimos",
+            "Degradación del rendimiento en horario pico",
+            "Fallo en el servicio de autenticación biométrica",
+            "Inconsistencia en datos entre staging y producción"
+        ];
 
-const sampleProblems = [
-    "Degradación progresiva del modelo por data drift",
-    "Sesgo algorítmico detectado en transacciones de bajo monto",
-    "Falta de datos etiquetados para reentrenamiento",
-    "Inconsistencia en features entre entrenamiento y producción",
-    "Memoria insuficiente en servidores de inferencia",
-    "Latencia elevada en consultas a base de datos histórica",
-    "Configuración incorrecta del balanceador de carga"
-];
+        const sampleProblems = [
+            "Degradación progresiva del modelo por data drift",
+            "Sesgo algorítmico detectado en transacciones de bajo monto",
+            "Falta de datos etiquetados para reentrenamiento",
+            "Inconsistencia en features entre entrenamiento y producción",
+            "Memoria insuficiente en servidores de inferencia",
+            "Latencia elevada en consultas a base de datos histórica",
+            "Configuración incorrecta del balanceador de carga"
+        ];
 
-const sampleChanges = [
-    "Actualización del modelo de Random Forest v2.3 a v2.4",
-    "Implementación de nuevo threshold de scoring (0.7 a 0.65)",
-    "Migración de base de datos PostgreSQL 12 a 14",
-    "Despliegue de dashboard de monitoreo en tiempo real",
-    "Actualización de bibliotecas de seguridad críticas",
-    "Cambio en arquitectura de microservicios",
-    "Implementación de cache distribuido Redis"
-];
+        const sampleChanges = [
+            "Actualización del modelo de Random Forest v2.3 a v2.4",
+            "Implementación de nuevo threshold de scoring (0.7 a 0.65)",
+            "Migración de base de datos PostgreSQL 12 a 14",
+            "Despliegue de dashboard de monitoreo en tiempo real",
+            "Actualización de bibliotecas de seguridad críticas",
+            "Cambio en arquitectura de microservicios",
+            "Implementación de cache distribuido Redis"
+        ];
 
-const sampleRisks = [
-    "Regulación bancaria podría exigir explicabilidad total del modelo",
-    "Fuga de talento clave (Data Scientists) a competidores",
-    "Ciberataque tipo adversarial attack al modelo de ML",
-    "Incompatibilidad con sistemas legacy del banco",
-    "Sobrecostos por uso de infraestructura cloud",
-    "Retrasos en certificaciones de seguridad requeridas",
-    "Resistencia al cambio por parte de usuarios finales"
-];
+        const sampleRisks = [
+            "Regulación bancaria podría exigir explicabilidad total del modelo",
+            "Fuga de talento clave (Data Scientists) a competidores",
+            "Ciberataque tipo adversarial attack al modelo de ML",
+            "Incompatibilidad con sistemas legacy del banco",
+            "Sobrecostos por uso de infraestructura cloud",
+            "Retrasos en certificaciones de seguridad requeridas",
+            "Resistencia al cambio por parte de usuarios finales"
+        ];
 
-const sampleMilestones = [
-    "Aprobación del comité ejecutivo para inicio del proyecto",
-    "Finalización de la fase de entrenamiento del modelo",
-    "Certificación PCI DSS del ambiente productivo",
-    "Go-live en producción con 10% del tráfico",
-    "Completar integración con sistema core bancario",
-    "Aprobación de auditoría de seguridad externa",
-    "Capacitación completa de usuarios finales",
-    "Documentación técnica y operativa finalizada"
-];
+        const sampleMilestones = [
+            "Aprobación del comité ejecutivo para inicio del proyecto",
+            "Finalización de la fase de entrenamiento del modelo",
+            "Certificación PCI DSS del ambiente productivo",
+            "Go-live en producción con 10% del tráfico",
+            "Completar integración con sistema core bancario",
+            "Aprobación de auditoría de seguridad externa",
+            "Capacitación completa de usuarios finales",
+            "Documentación técnica y operativa finalizada"
+        ];
 
-const sampleLessons = [
-    "Validar calidad de datos ANTES de entrenar modelos",
-    "Incluir al área legal desde la fase de diseño",
-    "Realizar pruebas de carga con 3x el tráfico esperado",
-    "Documentar todas las decisiones del CAB",
-    "Establecer métricas de negocio claras desde el inicio",
-    "Involucrar a usuarios finales en pruebas tempranas",
-    "Mantener ambiente de staging idéntico a producción",
-    "Implementar rollback automático ante fallos críticos"
-];
+        const sampleLessons = [
+            "Validar calidad de datos ANTES de entrenar modelos",
+            "Incluir al área legal desde la fase de diseño",
+            "Realizar pruebas de carga con 3x el tráfico esperado",
+            "Documentar todas las decisiones del CAB",
+            "Establecer métricas de negocio claras desde el inicio",
+            "Involucrar a usuarios finales en pruebas tempranas",
+            "Mantener ambiente de staging idéntico a producción",
+            "Implementar rollback automático ante fallos críticos"
+        ];
 
-const sampleKnowledge = [
-    {
-        title: "Cómo interpretar métricas de un modelo de fraude",
-        content: "Precision, Recall, F1-Score y AUC-ROC son métricas clave. En detección de fraudes, preferimos Recall alto para no perder fraudes reales, aunque esto genere más falsos positivos.",
-        category: "Machine Learning"
-    },
-    {
-        title: "Proceso de gestión de incidentes en servicios de IA",
-        content: "1) Detección automática vía monitoring, 2) Clasificación por severidad, 3) Escalamiento al equipo ML, 4) Análisis de impacto, 5) Resolución y cierre con documentación.",
-        category: "ITIL 4"
-    },
-    {
-        title: "Mitigación de sesgo algorítmico",
-        content: "Aplicar técnicas de fairness (reweighting, threshold optimization), auditar con datasets diversos, implementar monitoring continuo de métricas de equidad.",
-        category: "IA Ética"
-    },
-    {
-        title: "Gestión de cambios en modelos ML",
-        content: "Todo cambio en modelos requiere aprobación del CAB, pruebas A/B en producción, monitoreo de métricas de negocio y plan de rollback documentado.",
-        category: "ITIL 4"
-    },
-    {
-        title: "Estrategias de reentrenamiento de modelos",
-        content: "Reentrenar mensualmente con datos recientes, validar performance en holdout set, comparar con baseline, y desplegar solo si hay mejora significativa (>2% en métricas clave).",
-        category: "Machine Learning"
-    }
-];
+        const sampleKnowledge = [
+            {
+                title: "Cómo interpretar métricas de un modelo de fraude",
+                content: "Precision, Recall, F1-Score y AUC-ROC son métricas clave. En detección de fraudes, preferimos Recall alto para no perder fraudes reales.",
+                category: "Machine Learning"
+            },
+            {
+                title: "Proceso de gestión de incidentes en servicios de IA",
+                content: "1) Detección automática, 2) Clasificación por severidad, 3) Escalamiento al equipo ML, 4) Análisis de impacto, 5) Resolución y documentación.",
+                category: "ITIL 4"
+            },
+            {
+                title: "Mitigación de sesgo algorítmico",
+                content: "Aplicar técnicas de fairness, auditar con datasets diversos, implementar monitoring continuo de métricas de equidad.",
+                category: "IA Ética"
+            }
+        ];
 
-const responsables = [
-    "Juan Pérez - Data Scientist",
-    "María García - DevOps Engineer",
-    "Carlos López - ML Engineer",
-    "Ana Martínez - QA Analyst",
-    "Pedro Sánchez - Gestor de Cambios",
-    "Laura Torres - Analista de Riesgos",
-    "Miguel Ángel - Arquitecto de Soluciones",
-    "Sofia Ramírez - Product Owner"
-];
+        const responsables = [
+            "Juan Pérez - Data Scientist",
+            "María García - DevOps Engineer",
+            "Carlos López - ML Engineer",
+            "Ana Martínez - QA Analyst",
+            "Pedro Sánchez - Gestor de Cambios",
+            "Laura Torres - Analista de Riesgos",
+            "Miguel Ángel - Arquitecto",
+            "Sofia Ramírez - Product Owner"
+        ];
 
-const pmbokAreas = [
-    "Alcance", "Cronograma", "Costos", "Calidad", "Recursos",
-    "Comunicaciones", "Riesgos", "Adquisiciones", "Interesados",
-    "Integración", "Métricas", "Adaptabilidad"
-];
+        const pmbokAreas = [
+            "Alcance", "Cronograma", "Costos", "Calidad", "Recursos",
+            "Comunicaciones", "Riesgos", "Adquisiciones", "Interesados"
+        ];
 
-// ===================================
-// INICIALIZACIÓN
-// ===================================
-document.addEventListener('DOMContentLoaded', () => {
-    loadDataFromStorage();
-    setTimeout(() => {
-        initializeCharts();
-        renderAllTables();
-        updateAllCharts();
-        updateMetrics();
-    }, 100);
-    startSimulation();
-    startProjectDayCounter();
-    updateDateTime();
-    setInterval(updateDateTime, 1000);
-    setupEventListeners();
-});
-
-// ===================================
-// GESTIÓN DE PESTAÑAS
-// ===================================
-function setupEventListeners() {
-    document.querySelectorAll('.nav-tab').forEach(tab => {
-        tab.addEventListener('click', (e) => {
-            const target = e.currentTarget.dataset.tab;
-            switchTab(target);
-        });
-    });
-
-    document.querySelectorAll('.sub-tab').forEach(tab => {
-        tab.addEventListener('click', (e) => {
-            const target = e.currentTarget.dataset.subtab;
-            switchSubTab(target, e.currentTarget.closest('.tab-content').id);
-        });
-    });
-
-    document.getElementById('simulationToggle').addEventListener('click', toggleSimulation);
-    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-}
-
-function switchTab(tabName) {
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    
-    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-    document.getElementById(tabName).classList.add('active');
-}
-
-function switchSubTab(subtabName, parentTab) {
-    const parent = document.getElementById(parentTab);
-    parent.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
-    parent.querySelectorAll('.sub-content').forEach(c => c.classList.remove('active'));
-    
-    parent.querySelector(`[data-subtab="${subtabName}"]`).classList.add('active');
-    parent.getElementById(subtabName).classList.add('active');
-}
-
-// ===================================
-// SIMULACIÓN AUTOMÁTICA
-// ===================================
-function startSimulation() {
-    if (simulationInterval) clearInterval(simulationInterval);
-    
-    simulationInterval = setInterval(() => {
-        if (simulationActive) {
-            generateRandomRecord();
+        // Funciones auxiliares
+        function generateId(prefix) {
+            return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
         }
-    }, 5000);
-}
 
-function toggleSimulation() {
-    simulationActive = !simulationActive;
-    const btn = document.getElementById('simulationToggle');
-    const indicator = document.querySelector('.status-indicator');
-    
-    if (simulationActive) {
-        btn.innerHTML = '<i class="fas fa-pause"></i><span>Pausar Simulación</span>';
-        btn.classList.remove('paused');
-        indicator.classList.add('active');
-    } else {
-        btn.innerHTML = '<i class="fas fa-play"></i><span>Reanudar Simulación</span>';
-        btn.classList.add('paused');
-        indicator.classList.remove('active');
-    }
-}
-
-function generateRandomRecord() {
-    const types = ['incidente', 'problema', 'cambio', 'riesgo', 'hito', 'leccion', 'conocimiento'];
-    const randomType = types[Math.floor(Math.random() * types.length)];
-    
-    const record = createRandomRecord(randomType);
-    addRecord(randomType, record, true);
-}
-
-function createRandomRecord(type) {
-    const today = new Date();
-    const randomDays = Math.floor(Math.random() * 30);
-    const date = new Date(today.getTime() + randomDays * 24 * 60 * 60 * 1000);
-    
-    switch(type) {
-        case 'incidente':
-            return {
-                id: generateId('INC'),
-                fecha: formatDate(date),
-                descripcion: sampleIncidents[Math.floor(Math.random() * sampleIncidents.length)],
-                severidad: ['Crítica', 'Alta', 'Media', 'Baja'][Math.floor(Math.random() * 4)],
-                responsable: responsables[Math.floor(Math.random() * responsables.length)],
-                estado: ['Abierto', 'En Progreso', 'Resuelto'][Math.floor(Math.random() * 3)]
-            };
-        
-        case 'problema':
-            return {
-                id: generateId('PRB'),
-                fecha: formatDate(date),
-                descripcion: sampleProblems[Math.floor(Math.random() * sampleProblems.length)],
-                causaRaiz: 'Análisis en progreso mediante técnica 5 Whys y diagrama de Ishikawa',
-                responsable: responsables[Math.floor(Math.random() * responsables.length)],
-                estado: ['Abierto', 'En Análisis', 'Resuelto'][Math.floor(Math.random() * 3)]
-            };
-        
-        case 'cambio':
-            return {
-                id: generateId('CHG'),
-                fecha: formatDate(date),
-                descripcion: sampleChanges[Math.floor(Math.random() * sampleChanges.length)],
-                tipo: ['Normal', 'Estándar', 'Emergencia'][Math.floor(Math.random() * 3)],
-                impacto: ['Alto', 'Medio', 'Bajo'][Math.floor(Math.random() * 3)],
-                estado: ['Pendiente', 'Aprobado', 'Rechazado', 'Implementado'][Math.floor(Math.random() * 4)]
-            };
-        
-        case 'riesgo':
-            const prob = ['Alta', 'Media', 'Baja'][Math.floor(Math.random() * 3)];
-            const imp = ['Alto', 'Medio', 'Bajo'][Math.floor(Math.random() * 3)];
-            return {
-                id: generateId('RSK'),
-                fecha: formatDate(date),
-                descripcion: sampleRisks[Math.floor(Math.random() * sampleRisks.length)],
-                probabilidad: prob,
-                impacto: imp,
-                mitigacion: 'Plan de mitigación definido y en seguimiento continuo',
-                responsableRiesgo: responsables[Math.floor(Math.random() * responsables.length)],
-                categoria: ['Técnico', 'Financiero', 'Operacional', 'Legal'][Math.floor(Math.random() * 4)],
-                estado: ['Activo', 'Mitigado', 'Cerrado'][Math.floor(Math.random() * 3)]
-            };
-        
-        case 'hito':
-            return {
-                id: generateId('MLT'),
-                fechaPlanificada: formatDate(date),
-                descripcion: sampleMilestones[Math.floor(Math.random() * sampleMilestones.length)],
-                entregable: 'Documento técnico, presentación ejecutiva y aprobación formal',
-                responsable: responsables[Math.floor(Math.random() * responsables.length)],
-                estado: ['Pendiente', 'En Progreso', 'Completado'][Math.floor(Math.random() * 3)],
-                progreso: Math.floor(Math.random() * 100)
-            };
-        
-        case 'leccion':
-            return {
-                id: generateId('LCN'),
-                fecha: formatDate(date),
-                situacion: 'Experiencia durante fase de ' + ['desarrollo', 'testing', 'despliegue', 'operación'][Math.floor(Math.random() * 4)],
-                leccion: sampleLessons[Math.floor(Math.random() * sampleLessons.length)],
-                categoria: pmbokAreas[Math.floor(Math.random() * pmbokAreas.length)],
-                impacto: ['Positivo', 'Negativo', 'Neutral'][Math.floor(Math.random() * 3)],
-                aplicabilidad: ['Alta', 'Media', 'Baja'][Math.floor(Math.random() * 3)]
-            };
-        
-        case 'conocimiento':
-            const kb = sampleKnowledge[Math.floor(Math.random() * sampleKnowledge.length)];
-            return {
-                id: generateId('KB'),
-                fecha: formatDate(date),
-                titulo: kb.title,
-                contenido: kb.content,
-                categoria: kb.category,
-                autor: responsables[Math.floor(Math.random() * responsables.length)]
-            };
-    }
-}
-
-function generateId(prefix) {
-    return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-}
-
-function formatDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
-
-// ===================================
-// GESTIÓN DE DATOS
-// ===================================
-function addRecord(type, record, isAutomatic = false) {
-    const key = type + 's';
-    if (!allData[key]) allData[key] = [];
-    
-    allData[key].push(record);
-    saveDataToStorage();
-    renderTable(key);
-    updateAllCharts();
-    updateMetrics();
-    updateProjectProgress();
-    
-    if (isAutomatic) {
-        showToast(`Nuevo ${type} generado automáticamente`, 'success');
-    } else {
-        showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} agregado exitosamente`, 'success');
-    }
-}
-
-function deleteRecord(type, id) {
-    const key = type + 's';
-    allData[key] = allData[key].filter(item => item.id !== id);
-    saveDataToStorage();
-    renderTable(key);
-    updateAllCharts();
-    updateMetrics();
-    updateProjectProgress();
-    showToast('Registro eliminado', 'warning');
-}
-
-function saveDataToStorage() {
-    localStorage.setItem('fraudDetectionData', JSON.stringify(allData));
-    localStorage.setItem('projectDay', projectDay.toString());
-}
-
-function loadDataFromStorage() {
-    const stored = localStorage.getItem('fraudDetectionData');
-    if (stored) {
-        allData = JSON.parse(stored);
-    }
-    
-    const storedDay = localStorage.getItem('projectDay');
-    if (storedDay) {
-        projectDay = parseInt(storedDay);
-        document.getElementById('projectDay').textContent = projectDay;
-    }
-}
-
-// ===================================
-// RENDERIZADO DE TABLAS
-// ===================================
-function renderAllTables() {
-    renderTable('incidentes');
-    renderTable('problemas');
-    renderTable('cambios');
-    renderTable('riesgos');
-    renderTable('hitos');
-    renderTable('lecciones');
-    renderKnowledgeBase();
-}
-
-function renderTable(type) {
-    const tbody = document.getElementById(type + 'Body');
-    if (!tbody) return;
-    
-    tbody.innerHTML = '';
-    const data = allData[type] || [];
-    
-    data.forEach(item => {
-        const row = tbody.insertRow();
-        
-        switch(type) {
-            case 'incidentes':
-                row.innerHTML = `
-                    <td>${item.id}</td>
-                    <td>${item.fecha}</td>
-                    <td>${item.descripcion}</td>
-                    <td><span class="badge badge-${getSeverityClass(item.severidad)}">${item.severidad}</span></td>
-                    <td>${item.responsable}</td>
-                    <td><span class="badge badge-${getStatusClass(item.estado)}">${item.estado}</span></td>
-                    <td>
-                        <button class="btn-danger btn-small" onclick="deleteRecord('incidente', '${item.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                break;
-            
-            case 'problemas':
-                row.innerHTML = `
-                    <td>${item.id}</td>
-                    <td>${item.fecha}</td>
-                    <td>${item.descripcion}</td>
-                    <td>${item.causaRaiz}</td>
-                    <td>${item.responsable}</td>
-                    <td><span class="badge badge-${getStatusClass(item.estado)}">${item.estado}</span></td>
-                    <td>
-                        <button class="btn-danger btn-small" onclick="deleteRecord('problema', '${item.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                break;
-            
-            case 'cambios':
-                row.innerHTML = `
-                    <td>${item.id}</td>
-                    <td>${item.fecha}</td>
-                    <td>${item.descripcion}</td>
-                    <td><span class="badge badge-info">${item.tipo}</span></td>
-                    <td><span class="badge badge-${getImpactClass(item.impacto)}">${item.impacto}</span></td>
-                    <td><span class="badge badge-${getChangeStatusClass(item.estado)}">${item.estado}</span></td>
-                    <td>
-                        <button class="btn-danger btn-small" onclick="deleteRecord('cambio', '${item.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                break;
-            
-            case 'riesgos':
-                row.innerHTML = `
-                    <td>${item.id}</td>
-                    <td>${item.fecha}</td>
-                    <td>${item.descripcion}</td>
-                    <td><span class="badge badge-${getProbabilityClass(item.probabilidad)}">${item.probabilidad}</span></td>
-                    <td><span class="badge badge-${getImpactClass(item.impacto)}">${item.impacto}</span></td>
-                    <td>${item.mitigacion.substring(0, 40)}...</td>
-                    <td>
-                        <button class="btn-info btn-small" onclick='showRiskDetail(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn-danger btn-small" onclick="deleteRecord('riesgo', '${item.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                break;
-            
-            case 'hitos':
-                row.innerHTML = `
-                    <td>${item.id}</td>
-                    <td>${item.fechaPlanificada}</td>
-                    <td>${item.descripcion}</td>
-                    <td>${item.entregable}</td>
-                    <td>${item.responsable}</td>
-                    <td><span class="badge badge-${getStatusClass(item.estado)}">${item.estado}</span></td>
-                    <td>
-                        <button class="btn-danger btn-small" onclick="deleteRecord('hito', '${item.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                break;
-            
-            case 'lecciones':
-                row.innerHTML = `
-                    <td>${item.id}</td>
-                    <td>${item.fecha}</td>
-                    <td>${item.situacion}</td>
-                    <td>${item.leccion}</td>
-                    <td><span class="badge badge-primary">${item.categoria}</span></td>
-                    <td>
-                        <button class="btn-danger btn-small" onclick="deleteRecord('leccion', '${item.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                break;
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         }
-    });
-}
 
-function renderKnowledgeBase() {
-    const container = document.getElementById('knowledgeGrid');
-    container.innerHTML = '';
-    
-    const data = allData.conocimientos || [];
-    data.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'knowledge-card';
-        card.innerHTML = `
-            <h3>${item.titulo}</h3>
-            <p>${item.contenido}</p>
-            <div class="knowledge-meta">
-                <span><i class="fas fa-tag"></i> ${item.categoria}</span>
-                <span><i class="fas fa-user"></i> ${item.autor}</span>
-            </div>
-            <div style="margin-top: 1rem;">
-                <button class="btn-danger btn-small" onclick="deleteRecord('conocimiento', '${item.id}')">
-                    <i class="fas fa-trash"></i> Eliminar
-                </button>
-            </div>
-        `;
-        container.appendChild(card);
-    });
-}
-
-// ===================================
-// MODAL DE DETALLE DE RIESGO
-// ===================================
-function showRiskDetail(risk) {
-    const modal = document.getElementById('riskDetailModal');
-    const body = document.getElementById('riskDetailBody');
-    
-    const severityCalc = calculateRiskSeverity(risk.probabilidad, risk.impacto);
-    
-    body.innerHTML = `
-        <div class="risk-info-item">
-            <h4>ID del Riesgo</h4>
-            <p>${risk.id}</p>
-        </div>
-        <div class="risk-info-item">
-            <h4>Fecha de Identificación</h4>
-            <p>${risk.fecha}</p>
-        </div>
-        <div class="risk-info-item">
-            <h4>Descripción Completa</h4>
-            <p>${risk.descripcion}</p>
-        </div>
-        <div class="risk-info-item">
-            <h4>Nivel de Severidad</h4>
-            <span class="risk-severity ${severityCalc.class}">
-                <i class="fas fa-exclamation-triangle"></i> ${severityCalc.label}
-            </span>
-        </div>
-        <div class="risk-info-item">
-            <h4>Probabilidad de Ocurrencia</h4>
-            <p><span class="badge badge-${getProbabilityClass(risk.probabilidad)}">${risk.probabilidad}</span></p>
-        </div>
-        <div class="risk-info-item">
-            <h4>Impacto en el Proyecto</h4>
-            <p><span class="badge badge-${getImpactClass(risk.impacto)}">${risk.impacto}</span></p>
-        </div>
-        <div class="risk-info-item">
-            <h4>Plan de Mitigación</h4>
-            <p>${risk.mitigacion}</p>
-        </div>
-        ${risk.responsableRiesgo ? `
-        <div class="risk-info-item">
-            <h4>Responsable</h4>
-            <p>${risk.responsableRiesgo}</p>
-        </div>` : ''}
-        ${risk.categoria ? `
-        <div class="risk-info-item">
-            <h4>Categoría</h4>
-            <p><span class="badge badge-info">${risk.categoria}</span></p>
-        </div>` : ''}
-        ${risk.estado ? `
-        <div class="risk-info-item">
-            <h4>Estado Actual</h4>
-            <p><span class="badge badge-${getStatusClass(risk.estado)}">${risk.estado}</span></p>
-        </div>` : ''}
-    `;
-    
-    modal.classList.add('active');
-}
-
-function closeRiskDetail() {
-    document.getElementById('riskDetailModal').classList.remove('active');
-}
-
-function calculateRiskSeverity(prob, impact) {
-    const probValue = prob === 'Alta' ? 3 : prob === 'Media' ? 2 : 1;
-    const impactValue = impact === 'Alto' ? 3 : impact === 'Medio' ? 2 : 1;
-    const total = probValue * impactValue;
-    
-    if (total >= 6) return { label: 'Severidad Crítica', class: 'high' };
-    if (total >= 3) return { label: 'Severidad Media', class: 'medium' };
-    return { label: 'Severidad Baja', class: 'low' };
-}
-
-// ===================================
-// CLASES DE ESTILO
-// ===================================
-function getSeverityClass(severity) {
-    const map = { 'Crítica': 'danger', 'Alta': 'danger', 'Media': 'warning', 'Baja': 'info' };
-    return map[severity] || 'info';
-}
-
-function getStatusClass(status) {
-    const map = { 'Resuelto': 'success', 'Completado': 'success', 'Mitigado': 'success', 'Cerrado': 'success', 'En Progreso': 'warning', 'En Análisis': 'warning', 'Abierto': 'danger', 'Activo': 'danger', 'Pendiente': 'info' };
-    return map[status] || 'info';
-}
-
-function getChangeStatusClass(status) {
-    const map = { 'Implementado': 'success', 'Aprobado': 'primary', 'Pendiente': 'warning', 'Rechazado': 'danger' };
-    return map[status] || 'info';
-}
-
-function getImpactClass(impact) {
-    const map = { 'Alto': 'danger', 'Medio': 'warning', 'Bajo': 'success' };
-    return map[impact] || 'info';
-}
-
-function getProbabilityClass(prob) {
-    const map = { 'Alta': 'danger', 'Media': 'warning', 'Baja': 'success' };
-    return map[prob] || 'info';
-}
-
-// ===================================
-// FILTROS Y BÚSQUEDA
-// ===================================
-function filterTable(tableId, searchTerm) {
-    const table = document.getElementById(tableId);
-    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    
-    for (let row of rows) {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(searchTerm.toLowerCase()) ? '' : 'none';
-    }
-}
-
-function filterKnowledge(searchTerm) {
-    const cards = document.querySelectorAll('.knowledge-card');
-    cards.forEach(card => {
-        const text = card.textContent.toLowerCase();
-        card.style.display = text.includes(searchTerm.toLowerCase()) ? '' : 'none';
-    });
-}
-
-// ===================================
-// FORMULARIOS MODALES
-// ===================================
-function showAddForm(type) {
-    const modal = document.getElementById('formModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalBody = document.getElementById('modalBody');
-    
-    modalTitle.textContent = `Agregar Nuevo ${type.charAt(0).toUpperCase() + type.slice(1)}`;
-    
-    let formHTML = '';
-    
-    switch(type) {
-        case 'incidente':
-            formHTML = `
-                <form onsubmit="submitForm(event, 'incidente')">
-                    <div class="form-group">
-                        <label>Fecha</label>
-                        <input type="date" name="fecha" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Descripción</label>
-                        <textarea name="descripcion" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Tipo</label>
-                        <select name="tipo" required>
-                            <option>Normal</option>
-                            <option>Estándar</option>
-                            <option>Emergencia</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Impacto</label>
-                        <select name="impacto" required>
-                            <option>Alto</option>
-                            <option>Medio</option>
-                            <option>Bajo</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Estado</label>
-                        <select name="estado" required>
-                            <option>Pendiente</option>
-                            <option>Aprobado</option>
-                            <option>Rechazado</option>
-                            <option>Implementado</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-primary">Guardar</button>
-                </form>
-            `;
-            break;
-        
-        case 'riesgo':
-            formHTML = `
-                <form onsubmit="submitForm(event, 'riesgo')">
-                    <div class="form-group">
-                        <label>Fecha</label>
-                        <input type="date" name="fecha" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Descripción</label>
-                        <textarea name="descripcion" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Probabilidad</label>
-                        <select name="probabilidad" required>
-                            <option>Alta</option>
-                            <option>Media</option>
-                            <option>Baja</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Impacto</label>
-                        <select name="impacto" required>
-                            <option>Alto</option>
-                            <option>Medio</option>
-                            <option>Bajo</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Plan de Mitigación</label>
-                        <textarea name="mitigacion" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Responsable</label>
-                        <select name="responsableRiesgo" required>
-                            ${responsables.map(r => `<option>${r}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Categoría</label>
-                        <select name="categoria" required>
-                            <option>Técnico</option>
-                            <option>Financiero</option>
-                            <option>Operacional</option>
-                            <option>Legal</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Estado</label>
-                        <select name="estado" required>
-                            <option>Activo</option>
-                            <option>Mitigado</option>
-                            <option>Cerrado</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-primary">Guardar</button>
-                </form>
-            `;
-            break;
-        
-        case 'hito':
-            formHTML = `
-                <form onsubmit="submitForm(event, 'hito')">
-                    <div class="form-group">
-                        <label>Fecha Planificada</label>
-                        <input type="date" name="fechaPlanificada" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Descripción</label>
-                        <textarea name="descripcion" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Entregable</label>
-                        <input type="text" name="entregable" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Responsable</label>
-                        <select name="responsable" required>
-                            ${responsables.map(r => `<option>${r}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Estado</label>
-                        <select name="estado" required>
-                            <option>Pendiente</option>
-                            <option>En Progreso</option>
-                            <option>Completado</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Progreso (%)</label>
-                        <input type="number" name="progreso" min="0" max="100" value="0" required>
-                    </div>
-                    <button type="submit" class="btn-primary">Guardar</button>
-                </form>
-            `;
-            break;
-        
-        case 'leccion':
-            formHTML = `
-                <form onsubmit="submitForm(event, 'leccion')">
-                    <div class="form-group">
-                        <label>Fecha</label>
-                        <input type="date" name="fecha" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Situación</label>
-                        <textarea name="situacion" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Lección Aprendida</label>
-                        <textarea name="leccion" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Categoría PMBOK</label>
-                        <select name="categoria" required>
-                            ${pmbokAreas.map(a => `<option>${a}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Tipo de Impacto</label>
-                        <select name="impacto" required>
-                            <option>Positivo</option>
-                            <option>Negativo</option>
-                            <option>Neutral</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Aplicabilidad</label>
-                        <select name="aplicabilidad" required>
-                            <option>Alta</option>
-                            <option>Media</option>
-                            <option>Baja</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-primary">Guardar</button>
-                </form>
-            `;
-            break;
-        
-        case 'conocimiento':
-            formHTML = `
-                <form onsubmit="submitForm(event, 'conocimiento')">
-                    <div class="form-group">
-                        <label>Título</label>
-                        <input type="text" name="titulo" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Contenido</label>
-                        <textarea name="contenido" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Categoría</label>
-                        <input type="text" name="categoria" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Autor</label>
-                        <select name="autor" required>
-                            ${responsables.map(r => `<option>${r}</option>`).join('')}
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-primary">Guardar</button>
-                </form>
-            `;
-            break;
-    }
-    
-    modalBody.innerHTML = formHTML;
-    modal.classList.add('active');
-}
-
-function submitForm(event, type) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const record = {
-        id: generateId(type.substring(0, 3).toUpperCase()),
-        fecha: formData.get('fecha') || formatDate(new Date())
-    };
-    
-    for (let [key, value] of formData.entries()) {
-        if (key !== 'fecha') record[key] = value;
-    }
-    
-    addRecord(type, record, false);
-    closeModal();
-}
-
-function closeModal() {
-    document.getElementById('formModal').classList.remove('active');
-}
-
-// ===================================
-// GRÁFICOS CON CHART.JS
-// ===================================
-let charts = {};
-
-function initializeCharts() {
-    const ctx1 = document.getElementById('incidentsSeverityChart');
-    if (ctx1) {
-        charts.incidentsSeverity = new Chart(ctx1.getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: ['Crítica', 'Alta', 'Media', 'Baja'],
-                datasets: [{
-                    label: 'Cantidad',
-                    data: [0, 0, 0, 0],
-                    backgroundColor: ['#dc3545', '#ff6384', '#ffc107', '#17a2b8'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { display: false }
-                }
-            }
-        });
-    }
-
-    const ctx2 = document.getElementById('changesStatusChart');
-    if (ctx2) {
-        charts.changesStatus = new Chart(ctx2.getContext('2d'), {
-            type: 'pie',
-            data: {
-                labels: ['Pendiente', 'Aprobado', 'Rechazado', 'Implementado'],
-                datasets: [{
-                    data: [0, 0, 0, 0],
-                    backgroundColor: ['#ffc107', '#0055ff', '#dc3545', '#28a745']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true
-            }
-        });
-    }
-
-    const ctx3 = document.getElementById('risksTimelineChart');
-    if (ctx3) {
-        charts.risksTimeline = new Chart(ctx3.getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Riesgos Activos',
-                    data: [],
-                    borderColor: '#dc3545',
-                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
-    }
-
-    const ctx4 = document.getElementById('pmbokAreasChart');
-    if (ctx4) {
-        charts.pmbokAreas = new Chart(ctx4.getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels: pmbokAreas,
-                datasets: [{
-                    data: new Array(12).fill(0),
-                    backgroundColor: [
-                        '#003087', '#0055ff', '#00a3e0', '#28a745', '#ffc107', '#dc3545',
-                        '#17a2b8', '#6610f2', '#e83e8c', '#fd7e14', '#20c997', '#6c757d'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true
-            }
-        });
-    }
-
-    const ctx5 = document.getElementById('incidentsResolvedChart');
-    if (ctx5) {
-        charts.incidentsResolved = new Chart(ctx5.getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
-                datasets: [
-                    {
-                        label: 'Resueltos',
-                        data: [0, 0, 0, 0],
-                        backgroundColor: '#28a745'
-                    },
-                    {
-                        label: 'Pendientes',
-                        data: [0, 0, 0, 0],
-                        backgroundColor: '#dc3545'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                scales: {
-                    x: { stacked: true },
-                    y: { stacked: true, beginAtZero: true }
-                }
-            }
-        });
-    }
-
-    const ctx6 = document.getElementById('itilMaturityChart');
-    if (ctx6) {
-        charts.itilMaturity = new Chart(ctx6.getContext('2d'), {
-            type: 'radar',
-            data: {
-                labels: ['Incidentes', 'Problemas', 'Cambios', 'Configuración', 'Capacidad', 'Disponibilidad'],
-                datasets: [{
-                    label: 'Nivel de Madurez',
-                    data: [0, 0, 0, 0, 0, 0],
-                    backgroundColor: 'rgba(0, 48, 135, 0.2)',
-                    borderColor: '#003087',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                scales: {
-                    r: {
-                        beginAtZero: true,
-                        max: 100
-                    }
-                }
-            }
-        });
-    }
-}
-
-function updateAllCharts() {
-    updateIncidentsSeverityChart();
-    updateChangesStatusChart();
-    updateRisksTimelineChart();
-    updatePmbokAreasChart();
-    updateIncidentsResolvedChart();
-    updateItilMaturityChart();
-}
-
-function updateIncidentsSeverityChart() {
-    if (!charts.incidentsSeverity) return;
-    const data = [0, 0, 0, 0];
-    (allData.incidentes || []).forEach(inc => {
-        switch(inc.severidad) {
-            case 'Crítica': data[0]++; break;
-            case 'Alta': data[1]++; break;
-            case 'Media': data[2]++; break;
-            case 'Baja': data[3]++; break;
+        function random(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
         }
-    });
-    charts.incidentsSeverity.data.datasets[0].data = data;
-    charts.incidentsSeverity.update();
-}
 
-function updateChangesStatusChart() {
-    if (!charts.changesStatus) return;
-    const data = [0, 0, 0, 0];
-    (allData.cambios || []).forEach(chg => {
-        switch(chg.estado) {
-            case 'Pendiente': data[0]++; break;
-            case 'Aprobado': data[1]++; break;
-            case 'Rechazado': data[2]++; break;
-            case 'Implementado': data[3]++; break;
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'success' ? '✅' : type === 'warning' ? '⚠️' : type === 'error' ? '❌' : 'ℹ️';
+            toast.innerHTML = `<span style="font-size: 1.5rem;">${icon}</span><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'slideInRight 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
-    });
-    charts.changesStatus.data.datasets[0].data = data;
-    charts.changesStatus.update();
-}
 
-function updateRisksTimelineChart() {
-    if (!charts.risksTimeline) return;
-    const risks = allData.riesgos || [];
-    const dateCount = {};
-    
-    risks.forEach(risk => {
-        dateCount[risk.fecha] = (dateCount[risk.fecha] || 0) + 1;
-    });
-    
-    const sortedDates = Object.keys(dateCount).sort();
-    const labels = sortedDates.slice(-10).map(d => d.substring(5));
-    const data = sortedDates.slice(-10).map(d => dateCount[d]);
-    
-    charts.risksTimeline.data.labels = labels;
-    charts.risksTimeline.data.datasets[0].data = data;
-    charts.risksTimeline.update();
-}
-
-function updatePmbokAreasChart() {
-    if (!charts.pmbokAreas) return;
-    const data = new Array(12).fill(0);
-    (allData.lecciones || []).forEach(lec => {
-        const index = pmbokAreas.indexOf(lec.categoria);
-        if (index !== -1) data[index]++;
-    });
-    
-    charts.pmbokAreas.data.datasets[0].data = data;
-    charts.pmbokAreas.update();
-}
-
-function updateIncidentsResolvedChart() {
-    if (!charts.incidentsResolved) return;
-    const resolved = [0, 0, 0, 0];
-    const pending = [0, 0, 0, 0];
-    
-    (allData.incidentes || []).forEach(inc => {
-        const week = Math.floor(Math.random() * 4);
-        if (inc.estado === 'Resuelto') {
-            resolved[week]++;
-        } else {
-            pending[week]++;
+        // Crear registro aleatorio
+        function createRandomRecord(type) {
+            const today = new Date();
+            const randomDays = Math.floor(Math.random() * 30);
+            const date = new Date(today.getTime() + randomDays * 24 * 60 * 60 * 1000);
+            
+            switch(type) {
+                case 'incidente':
+                    return {
+                        id: generateId('INC'),
+                        fecha: formatDate(date),
+                        descripcion: random(sampleIncidents),
+                        severidad: random(['Crítica', 'Alta', 'Media', 'Baja']),
+                        responsable: random(responsables),
+                        estado: random(['Abierto', 'En Progreso', 'Resuelto'])
+                    };
+                
+                case 'problema':
+                    return {
+                        id: generateId('PRB'),
+                        fecha: formatDate(date),
+                        descripcion: random(sampleProblems),
+                        causaRaiz: 'Análisis en progreso mediante técnica 5 Whys',
+                        responsable: random(responsables),
+                        estado: random(['Abierto', 'En Análisis', 'Resuelto'])
+                    };
+                
+                case 'cambio':
+                    return {
+                        id: generateId('CHG'),
+                        fecha: formatDate(date),
+                        descripcion: random(sampleChanges),
+                        tipo: random(['Normal', 'Estándar', 'Emergencia']),
+                        impacto: random(['Alto', 'Medio', 'Bajo']),
+                        estado: random(['Pendiente', 'Aprobado', 'Rechazado', 'Implementado'])
+                    };
+                
+                case 'riesgo':
+                    return {
+                        id: generateId('RSK'),
+                        fecha: formatDate(date),
+                        descripcion: random(sampleRisks),
+                        probabilidad: random(['Alta', 'Media', 'Baja']),
+                        impacto: random(['Alto', 'Medio', 'Bajo']),
+                        mitigacion: 'Plan de mitigación definido y en seguimiento',
+                        responsableRiesgo: random(responsables),
+                        categoria: random(['Técnico', 'Financiero', 'Operacional', 'Legal']),
+                        estado: random(['Activo', 'Mitigado', 'Cerrado'])
+                    };
+                
+                case 'hito':
+                    return {
+                        id: generateId('MLT'),
+                        fechaPlanificada: formatDate(date),
+                        descripcion: random(sampleMilestones),
+                        entregable: 'Documento técnico y presentación ejecutiva',
+                        responsable: random(responsables),
+                        estado: random(['Pendiente', 'En Progreso', 'Completado']),
+                        progreso: Math.floor(Math.random() * 100)
+                    };
+                
+                case 'leccion':
+                    return {
+                        id: generateId('LCN'),
+                        fecha: formatDate(date),
+                        situacion: 'Experiencia durante fase de ' + random(['desarrollo', 'testing', 'despliegue']),
+                        leccion: random(sampleLessons),
+                        categoria: random(pmbokAreas),
+                        impacto: random(['Positivo', 'Negativo', 'Neutral'])
+                    };
+                
+                case 'conocimiento':
+                    const kb = random(sampleKnowledge);
+                    return {
+                        id: generateId('KB'),
+                        fecha: formatDate(date),
+                        titulo: kb.title,
+                        contenido: kb.content,
+                        categoria: kb.category,
+                        autor: random(responsables)
+                    };
+            }
         }
-    });
-    
-    charts.incidentsResolved.data.datasets[0].data = resolved;
-    charts.incidentsResolved.data.datasets[1].data = pending;
-    charts.incidentsResolved.update();
-}
 
-function updateItilMaturityChart() {
-    if (!charts.itilMaturity) return;
-    const incCount = (allData.incidentes || []).length;
-    const probCount = (allData.problemas || []).length;
-    const chgCount = (allData.cambios || []).length;
-    
-    const maturity = [
-        Math.min(incCount * 5, 100),
-        Math.min(probCount * 8, 100),
-        Math.min(chgCount * 7, 100),
-        Math.min((incCount + probCount) * 3, 100),
-        Math.min(chgCount * 6, 100),
-        Math.min(incCount * 4, 100)
-    ];
-    
-    charts.itilMaturity.data.datasets[0].data = maturity;
-    charts.itilMaturity.update();
-}
+        // Generar registro aleatorio
+        function generateRandomRecord() {
+            const types = ['incidente', 'problema', 'cambio', 'riesgo', 'hito', 'leccion', 'conocimiento'];
+            const randomType = random(types);
+            const record = createRandomRecord(randomType);
+            
+            if (record) {
+                const key = randomType + 's';
+                allData[key].push(record);
+                renderTable(key);
+                updateCharts();
+                updateMetrics();
+                updateProgress();
+                showToast(`Nuevo ${randomType} generado automáticamente`, 'success');
+            }
+        }
 
-// ===================================
-// MÉTRICAS
-// ===================================
-function updateMetrics() {
-    const incidents = allData.incidentes || [];
-    const resolved = incidents.filter(i => i.estado === 'Resuelto').length;
-    const total = incidents.length;
-    
-    document.getElementById('avgResolutionTime').textContent = 
-        total > 0 ? `${(2 + Math.random() * 2).toFixed(1)} horas` : '0 horas';
-    
-    document.getElementById('firstContactResolution').textContent = 
-        total > 0 ? `${Math.floor(70 + Math.random() * 20)}%` : '0%';
-    
-    document.getElementById('userSatisfaction').textContent = 
-        total > 0 ? `${(4.2 + Math.random() * 0.8).toFixed(1)}/5.0` : '0/5.0';
-    
-    document.getElementById('activeIncidents').textContent = 
-        incidents.filter(i => i.estado !== 'Resuelto').length;
-}
-
-function updateProjectProgress() {
-    const milestones = allData.hitos || [];
-    const completed = milestones.filter(h => h.estado === 'Completado').length;
-    const total = milestones.length;
-    
-    const percentage = total > 0 ? Math.floor((completed / total) * 100) : 0;
-    const progressBar = document.getElementById('projectProgress');
-    
-    progressBar.style.width = percentage + '%';
-    progressBar.querySelector('.progress-text').textContent = percentage + '%';
-}
-
-// ===================================
-// CONTADOR DE DÍAS DEL PROYECTO
-// ===================================
-function startProjectDayCounter() {
-    projectDayInterval = setInterval(() => {
-        projectDay++;
-        document.getElementById('projectDay').textContent = projectDay;
-        saveDataToStorage();
-    }, 10000);
-}
-
-// ===================================
-// FECHA Y HORA ACTUAL
-// ===================================
-function updateDateTime() {
-    const now = new Date();
-    const options = { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    };
-    document.getElementById('currentDateTime').textContent = 
-        now.toLocaleDateString('es-ES', options);
-}
-
-// ===================================
-// MODO OSCURO
-// ===================================
-function toggleTheme() {
-    document.body.classList.toggle('dark-mode');
-    const icon = document.querySelector('.theme-toggle i');
-    
-    if (document.body.classList.contains('dark-mode')) {
-        icon.className = 'fas fa-sun';
-        localStorage.setItem('theme', 'dark');
-    } else {
-        icon.className = 'fas fa-moon';
-        localStorage.setItem('theme', 'light');
-    }
-}
-
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme === 'dark') {
-    document.body.classList.add('dark-mode');
-    document.querySelector('.theme-toggle i').className = 'fas fa-sun';
-}
-
-// ===================================
-// NOTIFICACIONES TOAST
-// ===================================
-function showToast(message, type = 'info') {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    
-    const icon = type === 'success' ? 'check-circle' : 
-                 type === 'warning' ? 'exclamation-triangle' : 
-                 type === 'error' ? 'times-circle' : 'info-circle';
-    
-    toast.innerHTML = `
-        <i class="fas fa-${icon}"></i>
-        <span class="toast-message">${message}</span>
-    `;
-    
-    container.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.animation = 'slideOutRight 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
-
-// ===================================
-// EXPORTAR/IMPORTAR DATOS
-// ===================================
-function exportJSON() {
-    const dataStr = JSON.stringify(allData, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `fraud-detection-data-${Date.now()}.json`;
-    a.click();
-    showToast('Datos exportados exitosamente', 'success');
-}
-
-function exportCSV() {
-    let csv = 'Tipo,ID,Fecha,Descripción,Detalles\n';
-    
-    ['incidentes', 'problemas', 'cambios', 'riesgos', 'hitos', 'lecciones'].forEach(type => {
-        (allData[type] || []).forEach(item => {
-            const details = Object.values(item).slice(2).join(' | ');
-            csv += `${type},${item.id},${item.fecha || item.fechaPlanificada},"${item.descripcion || item.situacion}","${details}"\n`;
-        });
-    });
-    
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `fraud-detection-data-${Date.now()}.csv`;
-    a.click();
-    showToast('CSV exportado exitosamente', 'success');
-}
-
-function importJSON(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            const imported = JSON.parse(e.target.result);
-            allData = imported;
-            saveDataToStorage();
-            renderAllTables();
-            updateAllCharts();
+        // Eliminar registro
+        function deleteRecord(type, id) {
+            const key = type + 's';
+            allData[key] = allData[key].filter(item => item.id !== id);
+            renderTable(key);
+            updateCharts();
             updateMetrics();
-            updateProjectProgress();
-            showToast('Datos importados exitosamente', 'success');
-        } catch (error) {
-            showToast('Error al importar datos: archivo inválido', 'error');
+            updateProgress();
+            showToast('Registro eliminado', 'warning');
         }
-    };
-    reader.readAsText(file);
-}
 
-// ===================================
-// DATOS DE EJEMPLO
-// ===================================
-function loadSampleData() {
-    if (!confirm('¿Desea cargar los datos de ejemplo? Esto agregará 20 registros nuevos.')) {
-        return;
-    }
-    
-    for (let i = 0; i < 20; i++) {
-        const types = ['incidente', 'problema', 'cambio', 'riesgo', 'hito', 'leccion'];
-        const type = types[i % types.length];
-        const record = createRandomRecord(type);
-        addRecord(type, record, false);
-    }
-    
-    showToast('20 registros de ejemplo cargados exitosamente', 'success');
-}
-
-function clearAllData() {
-    if (!confirm('¿Está seguro de eliminar TODOS los datos? Esta acción no se puede deshacer.')) {
-        return;
-    }
-    
-    allData = {
-        incidentes: [],
-        problemas: [],
-        cambios: [],
-        riesgos: [],
-        hitos: [],
-        lecciones: [],
-        conocimientos: []
-    };
-    
-    projectDay = 1;
-    document.getElementById('projectDay').textContent = '1';
-    
-    saveDataToStorage();
-    renderAllTables();
-    updateAllCharts();
-    updateMetrics();
-    updateProjectProgress();
-    
-    showToast('Todos los datos han sido eliminados', 'warning');
-}
-
-// ===================================
-// INICIALIZACIÓN ADICIONAL
-// ===================================
-document.getElementById('formModal').addEventListener('click', (e) => {
-    if (e.target.id === 'formModal') {
-        closeModal();
-    }
-});
-
-document.querySelector('.modal-content').addEventListener('click', (e) => {
-    e.stopPropagation();
-});
-
-document.getElementById('riskDetailModal').addEventListener('click', (e) => {
-    if (e.target.id === 'riskDetailModal') {
-        closeRiskDetail();
-    }
-});
-
-console.log('%c🚀 Sistema de Detección de Fraudes con IA - ITIL 4 + PMBOK 7', 'color: #003087; font-size: 20px; font-weight: bold;');
-console.log('%c✅ Aplicación inicializada correctamente', 'color: #28a745; font-size: 14px;');
-console.log('%c📊 Simulación automática activada (cada 5 segundos)', 'color: #0055ff; font-size: 14px;');
-    </script>
-</body>
-</html></label>
-                        <textarea name="descripcion" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Severidad</label>
-                        <select name="severidad" required>
-                            <option>Crítica</option>
-                            <option>Alta</option>
-                            <option>Media</option>
-                            <option>Baja</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Responsable</label>
-                        <select name="responsable" required>
-                            ${responsables.map(r => `<option>${r}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Estado</label>
-                        <select name="estado" required>
-                            <option>Abierto</option>
-                            <option>En Progreso</option>
-                            <option>Resuelto</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-primary">Guardar</button>
-                </form>
-            `;
-            break;
-        
-        case 'problema':
-            formHTML = `
-                <form onsubmit="submitForm(event, 'problema')">
-                    <div class="form-group">
-                        <label>Fecha</label>
-                        <input type="date" name="fecha" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Descripción</label>
-                        <textarea name="descripcion" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Causa Raíz</label>
-                        <textarea name="causaRaiz" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Responsable</label>
-                        <select name="responsable" required>
-                            ${responsables.map(r => `<option>${r}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Estado</label>
-                        <select name="estado" required>
-                            <option>Abierto</option>
-                            <option>En Análisis</option>
-                            <option>Resuelto</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-primary">Guardar</button>
-                </form>
-            `;
-            break;
-        
-        case 'cambio':
-            formHTML = `
-                <form onsubmit="submitForm(event, 'cambio')">
-                    <div class="form-group">
-                        <label>Fecha</label>
-                        <input type="date" name="fecha" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Descripción</label>
-                        <textarea name="descripcion" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Tipo</label>
-                        <select name="tipo" required>
-                            <option>Normal</option>
-                            <option>Estándar</option>
-                            <option>Emergencia</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Impacto</label>
-                        <select name="impacto" required>
-                            <option>Alto</option>
-                            <option>Medio</option>
-                            <option>Bajo</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Estado</label>
-                        <select name="estado" required>
-                            <option>Pendiente</option>
-                            <option>Aprobado</option>
-                            <option>Rechazado</option>
-                            <option>Implementado</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-primary">Guardar</button>
-                </form>
-            `;
-            break;
-        
-        case 'riesgo':
-            formHTML = `
-                <form onsubmit="submitForm(event, 'riesgo')">
-                    <div class="form-group">
-                        <label>Fecha</label>
-                        <input type="date" name="fecha" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Descripción</label>
-                        <textarea name="descripcion" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Probabilidad</label>
-                        <select name="probabilidad" required>
-                            <option>Alta</option>
-                            <option>Media</option>
-                            <option>Baja</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Impacto</label>
-                        <select name="impacto" required>
-                            <option>Alto</option>
-                            <option>Medio</option>
-                            <option>Bajo</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Plan de Mitigación</label>
-                        <textarea name="mitigacion" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Responsable</label>
-                        <select name="responsableRiesgo" required>
-                            ${responsables.map(r => `<option>${r}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Categoría</label>
-                        <select name="categoria" required>
-                            <option>Técnico</option>
-                            <option>Financiero</option>
-                            <option>Operacional</option>
-                            <option>Legal</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Estado</label>
-                        <select name="estado" required>
-                            <option>Activo</option>
-                            <option>Mitigado</option>
-                            <option>Cerrado</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-primary">Guardar</button>
-                </form>
-            `;
-            break;
-        
-        case 'hito':
-            formHTML = `
-                <form onsubmit="submitForm(event, 'hito')">
-                    <div class="form-group">
-                        <label>Fecha Planificada</label>
-                        <input type="date" name="fechaPlanificada" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Descripción</label>
-                        <textarea name="descripcion" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Entregable</label>
-                        <input type="text" name="entregable" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Responsable</label>
-                        <select name="responsable" required>
-                            ${responsables.map(r => `<option>${r}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Estado</label>
-                        <select name="estado" required>
-                            <option>Pendiente</option>
-                            <option>En Progreso</option>
-                            <option>Completado</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Progreso (%)</label>
-                        <input type="number" name="progreso" min="0" max="100" value="0" required>
-                    </div>
-                    <button type="submit" class="btn-primary">Guardar</button>
-                </form>
-            `;
-            break;
-        
-        case 'leccion':
-            formHTML = `
-                <form onsubmit="submitForm(event, 'leccion')">
-                    <div class="form-group">
-                        <label>Fecha</label>
-                        <input type="date" name="fecha" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Situación</label>
-                        <textarea name="situacion" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Lección Aprendida</label>
-                        <textarea name="leccion" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Categoría PMBOK</label>
-                        <select name="categoria" required>
-                            ${pmbokAreas.map(a => `<option>${a}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Tipo de Impacto</label>
-                        <select name="impacto" required>
-                            <option>Positivo</option>
-                            <option>Negativo</option>
-                            <option>Neutral</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Aplicabilidad</label>
-                        <select name="aplicabilidad" required>
-                            <option>Alta</option>
-                            <option>Media</option>
-                            <option>Baja</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-primary">Guardar</button>
-                </form>
-            `;
-            break;
-        
-        case 'conocimiento':
-            formHTML = `
-                <form onsubmit="submitForm(event, 'conocimiento')">
-                    <div class="form-group">
-                        <label>Título</label>
-                        <input type="text" name="titulo" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Contenido</label>
-                        <textarea name="contenido" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Categoría</label>
-                        <input type="text" name="categoria" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Autor</label>
-                        <select name="autor" required>
-                            ${responsables.map(r => `<option>${r}</option>`).join('')}
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-primary">Guardar</button>
-                </form>
-            `;
-            break;
-    }
-    
-    modalBody.innerHTML = formHTML;
-    modal.classList.add('active');
-}
-
-function submitForm(event, type) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const record = {
-        id: generateId(type.substring(0, 3).toUpperCase()),
-        fecha: formData.get('fecha') || formatDate(new Date())
-    };
-    
-    for (let [key, value] of formData.entries()) {
-        if (key !== 'fecha') record[key] = value;
-    }
-    
-    addRecord(type, record, false);
-    closeModal();
-}
-
-function closeModal() {
-    document.getElementById('formModal').classList.remove('active');
-}
-
-// ===================================
-// GRÁFICOS CON CHART.JS
-// ===================================
-let charts = {};
-
-function initializeCharts() {
-    const ctx1 = document.getElementById('incidentsSeverityChart');
-    if (ctx1) {
-        charts.incidentsSeverity = new Chart(ctx1.getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: ['Crítica', 'Alta', 'Media', 'Baja'],
-                datasets: [{
-                    label: 'Cantidad',
-                    data: [0, 0, 0, 0],
-                    backgroundColor: ['#dc3545', '#ff6384', '#ffc107', '#17a2b8'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { display: false }
+        // Renderizar tablas
+        function renderTable(type) {
+            const tbody = document.getElementById(type + 'Body');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            const data = allData[type] || [];
+            
+            data.forEach(item => {
+                const row = tbody.insertRow();
+                
+                switch(type) {
+                    case 'incidentes':
+                        row.innerHTML = `
+                            <td>${item.id}</td>
+                            <td>${item.fecha}</td>
+                            <td>${item.descripcion}</td>
+                            <td><span class="badge badge-${getSeverityClass(item.severidad)}">${item.severidad}</span></td>
+                            <td>${item.responsable}</td>
+                            <td><span class="badge badge-${getStatusClass(item.estado)}">${item.estado}</span></td>
+                            <td><button class="btn btn-danger btn-small" data-type="incidente" data-id="${item.id}">🗑️</button></td>
+                        `;
+                        break;
+                    
+                    case 'problemas':
+                        row.innerHTML = `
+                            <td>${item.id}</td>
+                            <td>${item.fecha}</td>
+                            <td>${item.descripcion}</td>
+                            <td>${item.causaRaiz}</td>
+                            <td>${item.responsable}</td>
+                            <td><span class="badge badge-${getStatusClass(item.estado)}">${item.estado}</span></td>
+                            <td><button class="btn btn-danger btn-small" data-type="problema" data-id="${item.id}">🗑️</button></td>
+                        `;
+                        break;
+                    
+                    case 'cambios':
+                        row.innerHTML = `
+                            <td>${item.id}</td>
+                            <td>${item.fecha}</td>
+                            <td>${item.descripcion}</td>
+                            <td><span class="badge badge-info">${item.tipo}</span></td>
+                            <td><span class="badge badge-${getImpactClass(item.impacto)}">${item.impacto}</span></td>
+                            <td><span class="badge badge-${getChangeStatusClass(item.estado)}">${item.estado}</span></td>
+                            <td><button class="btn btn-danger btn-small" data-type="cambio" data-id="${item.id}">🗑️</button></td>
+                        `;
+                        break;
+                    
+                    case 'riesgos':
+                        row.innerHTML = `
+                            <td>${item.id}</td>
+                            <td>${item.fecha}</td>
+                            <td>${item.descripcion}</td>
+                            <td><span class="badge badge-${getProbClass(item.probabilidad)}">${item.probabilidad}</span></td>
+                            <td><span class="badge badge-${getImpactClass(item.impacto)}">${item.impacto}</span></td>
+                            <td>${item.mitigacion.substring(0, 40)}...</td>
+                            <td>
+                                <button class="btn btn-primary btn-small" data-action="view-risk" data-risk-id="${item.id}">👁️</button>
+                                <button class="btn btn-danger btn-small" data-type="riesgo" data-id="${item.id}">🗑️</button>
+                            </td>
+                        `;
+                        break;
+                    
+                    case 'hitos':
+                        row.innerHTML = `
+                            <td>${item.id}</td>
+                            <td>${item.fechaPlanificada}</td>
+                            <td>${item.descripcion}</td>
+                            <td>${item.entregable}</td>
+                            <td>${item.responsable}</td>
+                            <td><span class="badge badge-${getStatusClass(item.estado)}">${item.estado}</span></td>
+                            <td><button class="btn btn-danger btn-small" data-type="hito" data-id="${item.id}">🗑️</button></td>
+                        `;
+                        break;
+                    
+                    case 'lecciones':
+                        row.innerHTML = `
+                            <td>${item.id}</td>
+                            <td>${item.fecha}</td>
+                            <td>${item.situacion}</td>
+                            <td>${item.leccion}</td>
+                            <td><span class="badge badge-primary">${item.categoria}</span></td>
+                            <td><button class="btn btn-danger btn-small" data-type="leccion" data-id="${item.id}">🗑️</button></td>
+                        `;
+                        break;
                 }
-            }
-        });
-    }
-
-    const ctx2 = document.getElementById('changesStatusChart');
-    if (ctx2) {
-        charts.changesStatus = new Chart(ctx2.getContext('2d'), {
-            type: 'pie',
-            data: {
-                labels: ['Pendiente', 'Aprobado', 'Rechazado', 'Implementado'],
-                datasets: [{
-                    data: [0, 0, 0, 0],
-                    backgroundColor: ['#ffc107', '#0055ff', '#dc3545', '#28a745']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true
-            }
-        });
-    }
-
-    const ctx3 = document.getElementById('risksTimelineChart');
-    if (ctx3) {
-        charts.risksTimeline = new Chart(ctx3.getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Riesgos Activos',
-                    data: [],
-                    borderColor: '#dc3545',
-                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                scales: {
-                    y: { beginAtZero: true }
+            });
+            
+            // Agregar event listeners a los botones de eliminar
+            tbody.querySelectorAll('[data-type][data-id]').forEach(btn => {
+                if (!btn.hasAttribute('data-action')) {
+                    btn.addEventListener('click', function() {
+                        deleteRecord(this.dataset.type, this.dataset.id);
+                    });
                 }
-            }
-        });
-    }
+            });
+            
+            // Agregar event listeners a los botones de ver riesgo
+            tbody.querySelectorAll('[data-action="view-risk"]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const riskId = this.dataset.riskId;
+                    const risk = allData.riesgos.find(r => r.id === riskId);
+                    if (risk) {
+                        showRiskDetail(risk);
+                    }
+                });
+            });
+        }
 
-    const ctx4 = document.getElementById('pmbokAreasChart');
-    if (ctx4) {
-        charts.pmbokAreas = new Chart(ctx4.getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels: pmbokAreas,
-                datasets: [{
-                    data: new Array(12).fill(0),
-                    backgroundColor: [
-                        '#003087', '#0055ff', '#00a3e0', '#28a745', '#ffc107', '#dc3545',
-                        '#17a2b8', '#6610f2', '#e83e8c', '#fd7e14', '#20c997', '#6c757d'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true
-            }
-        });
-    }
+        // Renderizar base de conocimientos
+        function renderKnowledge() {
+            const container = document.getElementById('knowledgeGrid');
+            container.innerHTML = '';
+            
+            allData.conocimientos.forEach(kb => {
+                const card = document.createElement('div');
+                card.className = 'knowledge-card';
+                card.innerHTML = `
+                    <h3>${kb.titulo}</h3>
+                    <p style="color: #6c757d; margin: 1rem 0;">${kb.contenido}</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid #dee2e6;">
+                        <span class="badge badge-primary">${kb.categoria}</span>
+                        <span style="font-size: 0.75rem; color: #6c757d;">${kb.autor}</span>
+                    </div>
+                    <button class="btn btn-danger btn-small" style="margin-top: 1rem;" data-type="conocimiento" data-id="${kb.id}">🗑️ Eliminar</button>
+                `;
+                container.appendChild(card);
+                
+                // Agregar event listener al botón de eliminar
+                card.querySelector('[data-type][data-id]').addEventListener('click', function() {
+                    deleteRecord(this.dataset.type, this.dataset.id);
+                });
+            });
+        }
 
-    const ctx5 = document.getElementById('incidentsResolvedChart');
-    if (ctx5) {
-        charts.incidentsResolved = new Chart(ctx5.getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
-                datasets: [
-                    {
-                        label: 'Resueltos',
-                        data: [0, 0, 0, 0],
-                        backgroundColor: '#28a745'
+        // Clases de estilo
+        function getSeverityClass(severity) {
+            const map = { 'Crítica': 'danger', 'Alta': 'danger', 'Media': 'warning', 'Baja': 'info' };
+            return map[severity] || 'info';
+        }
+
+        function getStatusClass(status) {
+            const map = { 
+                'Resuelto': 'success', 'Completado': 'success', 'Mitigado': 'success', 'Cerrado': 'success',
+                'En Progreso': 'warning', 'En Análisis': 'warning',
+                'Abierto': 'danger', 'Activo': 'danger', 'Pendiente': 'info'
+            };
+            return map[status] || 'info';
+        }
+
+        function getChangeStatusClass(status) {
+            const map = { 'Implementado': 'success', 'Aprobado': 'primary', 'Pendiente': 'warning', 'Rechazado': 'danger' };
+            return map[status] || 'info';
+        }
+
+        function getImpactClass(impact) {
+            const map = { 'Alto': 'danger', 'Medio': 'warning', 'Bajo': 'success' };
+            return map[impact] || 'info';
+        }
+
+        function getProbClass(prob) {
+            const map = { 'Alta': 'danger', 'Media': 'warning', 'Baja': 'success' };
+            return map[prob] || 'info';
+        }
+
+        // Modal de detalle de riesgo
+        function showRiskDetail(risk) {
+            const modal = document.getElementById('riskDetailModal');
+            const body = document.getElementById('riskDetailBody');
+            
+            const severity = calculateRiskSeverity(risk.probabilidad, risk.impacto);
+            
+            body.innerHTML = `
+                <div class="risk-info-item">
+                    <h4>ID del Riesgo</h4>
+                    <p>${risk.id}</p>
+                </div>
+                <div class="risk-info-item">
+                    <h4>Fecha de Identificación</h4>
+                    <p>${risk.fecha}</p>
+                </div>
+                <div class="risk-info-item">
+                    <h4>Descripción Completa</h4>
+                    <p>${risk.descripcion}</p>
+                </div>
+                <div class="risk-info-item">
+                    <h4>Nivel de Severidad</h4>
+                    <span class="badge badge-${severity.class}">${severity.label}</span>
+                </div>
+                <div class="risk-info-item">
+                    <h4>Probabilidad de Ocurrencia</h4>
+                    <span class="badge badge-${getProbClass(risk.probabilidad)}">${risk.probabilidad}</span>
+                </div>
+                <div class="risk-info-item">
+                    <h4>Impacto en el Proyecto</h4>
+                    <span class="badge badge-${getImpactClass(risk.impacto)}">${risk.impacto}</span>
+                </div>
+                <div class="risk-info-item">
+                    <h4>Plan de Mitigación</h4>
+                    <p>${risk.mitigacion}</p>
+                </div>
+                ${risk.responsableRiesgo ? `
+                <div class="risk-info-item">
+                    <h4>Responsable</h4>
+                    <p>${risk.responsableRiesgo}</p>
+                </div>` : ''}
+                ${risk.categoria ? `
+                <div class="risk-info-item">
+                    <h4>Categoría</h4>
+                    <span class="badge badge-info">${risk.categoria}</span>
+                </div>` : ''}
+                ${risk.estado ? `
+                <div class="risk-info-item">
+                    <h4>Estado Actual</h4>
+                    <span class="badge badge-${getStatusClass(risk.estado)}">${risk.estado}</span>
+                </div>` : ''}
+            `;
+            
+            modal.classList.add('active');
+        }
+
+        function closeRiskDetail() {
+            document.getElementById('riskDetailModal').classList.remove('active');
+        }
+
+        function calculateRiskSeverity(prob, impact) {
+            const probValue = prob === 'Alta' ? 3 : prob === 'Media' ? 2 : 1;
+            const impactValue = impact === 'Alto' ? 3 : impact === 'Medio' ? 2 : 1;
+            const total = probValue * impactValue;
+            
+            if (total >= 6) return { label: 'Severidad Crítica', class: 'danger' };
+            if (total >= 3) return { label: 'Severidad Media', class: 'warning' };
+            return { label: 'Severidad Baja', class: 'success' };
+        }
+
+        // Actualizar métricas
+        function updateMetrics() {
+            const incidents = allData.incidentes || [];
+            const total = incidents.length;
+            
+            document.getElementById('avgResolutionTime').textContent = 
+                total > 0 ? `${(2 + Math.random() * 2).toFixed(1)} horas` : '0 horas';
+            
+            document.getElementById('firstContactResolution').textContent = 
+                total > 0 ? `${Math.floor(70 + Math.random() * 20)}%` : '0%';
+            
+            document.getElementById('userSatisfaction').textContent = 
+                total > 0 ? `${(4.2 + Math.random() * 0.8).toFixed(1)}/5.0` : '0/5.0';
+            
+            document.getElementById('activeIncidents').textContent = 
+                incidents.filter(i => i.estado !== 'Resuelto').length;
+        }
+
+        // Actualizar progreso
+        function updateProgress() {
+            const milestones = allData.hitos || [];
+            const completed = milestones.filter(h => h.estado === 'Completado').length;
+            const total = milestones.length;
+            
+            const percentage = total > 0 ? Math.floor((completed / total) * 100) : 0;
+            const progressBar = document.getElementById('projectProgress');
+            
+            progressBar.style.width = percentage + '%';
+            progressBar.querySelector('.progress-text').textContent = percentage + '%';
+        }
+
+        // Gráficos
+        let charts = {};
+
+        function initCharts() {
+            const ctx1 = document.getElementById('incidentsSeverityChart');
+            if (ctx1) {
+                charts.severity = new Chart(ctx1.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Crítica', 'Alta', 'Media', 'Baja'],
+                        datasets: [{
+                            label: 'Cantidad',
+                            data: [0, 0, 0, 0],
+                            backgroundColor: ['#dc3545', '#ff6384', '#ffc107', '#17a2b8']
+                        }]
                     },
-                    {
-                        label: 'Pendientes',
-                        data: [0, 0, 0, 0],
-                        backgroundColor: '#dc3545'
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: { legend: { display: false } }
                     }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                scales: {
-                    x: { stacked: true },
-                    y: { stacked: true, beginAtZero: true }
-                }
+                });
             }
-        });
-    }
 
-    const ctx6 = document.getElementById('itilMaturityChart');
-    if (ctx6) {
-        charts.itilMaturity = new Chart(ctx6.getContext('2d'), {
-            type: 'radar',
-            data: {
-                labels: ['Incidentes', 'Problemas', 'Cambios', 'Configuración', 'Capacidad', 'Disponibilidad'],
-                datasets: [{
-                    label: 'Nivel de Madurez',
-                    data: [0, 0, 0, 0, 0, 0],
-                    backgroundColor: 'rgba(0, 48, 135, 0.2)',
-                    borderColor: '#003087',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                scales: {
-                    r: {
-                        beginAtZero: true,
-                        max: 100
+            const ctx2 = document.getElementById('changesStatusChart');
+            if (ctx2) {
+                charts.changes = new Chart(ctx2.getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['Pendiente', 'Aprobado', 'Rechazado', 'Implementado'],
+                        datasets: [{
+                            data: [0, 0, 0, 0],
+                            backgroundColor: ['#ffc107', '#0055ff', '#dc3545', '#28a745']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true
                     }
-                }
+                });
             }
-        });
-    }
-}
-
-function updateAllCharts() {
-    updateIncidentsSeverityChart();
-    updateChangesStatusChart();
-    updateRisksTimelineChart();
-    updatePmbokAreasChart();
-    updateIncidentsResolvedChart();
-    updateItilMaturityChart();
-}
-
-function updateIncidentsSeverityChart() {
-    if (!charts.incidentsSeverity) return;
-    const data = [0, 0, 0, 0];
-    (allData.incidentes || []).forEach(inc => {
-        switch(inc.severidad) {
-            case 'Crítica': data[0]++; break;
-            case 'Alta': data[1]++; break;
-            case 'Media': data[2]++; break;
-            case 'Baja': data[3]++; break;
         }
-    });
-    charts.incidentsSeverity.data.datasets[0].data = data;
-    charts.incidentsSeverity.update();
-}
 
-function updateChangesStatusChart() {
-    if (!charts.changesStatus) return;
-    const data = [0, 0, 0, 0];
-    (allData.cambios || []).forEach(chg => {
-        switch(chg.estado) {
-            case 'Pendiente': data[0]++; break;
-            case 'Aprobado': data[1]++; break;
-            case 'Rechazado': data[2]++; break;
-            case 'Implementado': data[3]++; break;
+        function updateCharts() {
+            if (charts.severity) {
+                const data = [0, 0, 0, 0];
+                (allData.incidentes || []).forEach(inc => {
+                    switch(inc.severidad) {
+                        case 'Crítica': data[0]++; break;
+                        case 'Alta': data[1]++; break;
+                        case 'Media': data[2]++; break;
+                        case 'Baja': data[3]++; break;
+                    }
+                });
+                charts.severity.data.datasets[0].data = data;
+                charts.severity.update();
+            }
+
+            if (charts.changes) {
+                const data = [0, 0, 0, 0];
+                (allData.cambios || []).forEach(chg => {
+                    switch(chg.estado) {
+                        case 'Pendiente': data[0]++; break;
+                        case 'Aprobado': data[1]++; break;
+                        case 'Rechazado': data[2]++; break;
+                        case 'Implementado': data[3]++; break;
+                    }
+                });
+                charts.changes.data.datasets[0].data = data;
+                charts.changes.update();
+            }
         }
-    });
-    charts.changesStatus.data.datasets[0].data = data;
-    charts.changesStatus.update();
-}
 
-function updateRisksTimelineChart() {
-    if (!charts.risksTimeline) return;
-    const risks = allData.riesgos || [];
-    const dateCount = {};
-    
-    risks.forEach(risk => {
-        dateCount[risk.fecha] = (dateCount[risk.fecha] || 0) + 1;
-    });
-    
-    const sortedDates = Object.keys(dateCount).sort();
-    const labels = sortedDates.slice(-10).map(d => d.substring(5));
-    const data = sortedDates.slice(-10).map(d => dateCount[d]);
-    
-    charts.risksTimeline.data.labels = labels;
-    charts.risksTimeline.data.datasets[0].data = data;
-    charts.risksTimeline.update();
-}
-
-function updatePmbokAreasChart() {
-    if (!charts.pmbokAreas) return;
-    const data = new Array(12).fill(0);
-    (allData.lecciones || []).forEach(lec => {
-        const index = pmbokAreas.indexOf(lec.categoria);
-        if (index !== -1) data[index]++;
-    });
-    
-    charts.pmbokAreas.data.datasets[0].data = data;
-    charts.pmbokAreas.update();
-}
-
-function updateIncidentsResolvedChart() {
-    if (!charts.incidentsResolved) return;
-    const resolved = [0, 0, 0, 0];
-    const pending = [0, 0, 0, 0];
-    
-    (allData.incidentes || []).forEach(inc => {
-        const week = Math.floor(Math.random() * 4);
-        if (inc.estado === 'Resuelto') {
-            resolved[week]++;
-        } else {
-            pending[week]++;
-        }
-    });
-    
-    charts.incidentsResolved.data.datasets[0].data = resolved;
-    charts.incidentsResolved.data.datasets[1].data = pending;
-    charts.incidentsResolved.update();
-}
-
-function updateItilMaturityChart() {
-    if (!charts.itilMaturity) return;
-    const incCount = (allData.incidentes || []).length;
-    const probCount = (allData.problemas || []).length;
-    const chgCount = (allData.cambios || []).length;
-    
-    const maturity = [
-        Math.min(incCount * 5, 100),
-        Math.min(probCount * 8, 100),
-        Math.min(chgCount * 7, 100),
-        Math.min((incCount + probCount) * 3, 100),
-        Math.min(chgCount * 6, 100),
-        Math.min(incCount * 4, 100)
-    ];
-    
-    charts.itilMaturity.data.datasets[0].data = maturity;
-    charts.itilMaturity.update();
-}
-
-// ===================================
-// MÉTRICAS
-// ===================================
-function updateMetrics() {
-    const incidents = allData.incidentes || [];
-    const resolved = incidents.filter(i => i.estado === 'Resuelto').length;
-    const total = incidents.length;
-    
-    document.getElementById('avgResolutionTime').textContent = 
-        total > 0 ? `${(2 + Math.random() * 2).toFixed(1)} horas` : '0 horas';
-    
-    document.getElementById('firstContactResolution').textContent = 
-        total > 0 ? `${Math.floor(70 + Math.random() * 20)}%` : '0%';
-    
-    document.getElementById('userSatisfaction').textContent = 
-        total > 0 ? `${(4.2 + Math.random() * 0.8).toFixed(1)}/5.0` : '0/5.0';
-    
-    document.getElementById('activeIncidents').textContent = 
-        incidents.filter(i => i.estado !== 'Resuelto').length;
-}
-
-function updateProjectProgress() {
-    const milestones = allData.hitos || [];
-    const completed = milestones.filter(h => h.estado === 'Completado').length;
-    const total = milestones.length;
-    
-    const percentage = total > 0 ? Math.floor((completed / total) * 100) : 0;
-    const progressBar = document.getElementById('projectProgress');
-    
-    progressBar.style.width = percentage + '%';
-    progressBar.querySelector('.progress-text').textContent = percentage + '%';
-}
-
-// ===================================
-// CONTADOR DE DÍAS DEL PROYECTO
-// ===================================
-function startProjectDayCounter() {
-    projectDayInterval = setInterval(() => {
-        projectDay++;
-        document.getElementById('projectDay').textContent = projectDay;
-        saveDataToStorage();
-    }, 10000);
-}
-
-// ===================================
-// FECHA Y HORA ACTUAL
-// ===================================
-function updateDateTime() {
-    const now = new Date();
-    const options = { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    };
-    document.getElementById('currentDateTime').textContent = 
-        now.toLocaleDateString('es-ES', options);
-}
-
-// ===================================
-// MODO OSCURO
-// ===================================
-function toggleTheme() {
-    document.body.classList.toggle('dark-mode');
-    const icon = document.querySelector('.theme-toggle i');
-    
-    if (document.body.classList.contains('dark-mode')) {
-        icon.className = 'fas fa-sun';
-        localStorage.setItem('theme', 'dark');
-    } else {
-        icon.className = 'fas fa-moon';
-        localStorage.setItem('theme', 'light');
-    }
-}
-
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme === 'dark') {
-    document.body.classList.add('dark-mode');
-    document.querySelector('.theme-toggle i').className = 'fas fa-sun';
-}
-
-// ===================================
-// NOTIFICACIONES TOAST
-// ===================================
-function showToast(message, type = 'info') {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    
-    const icon = type === 'success' ? 'check-circle' : 
-                 type === 'warning' ? 'exclamation-triangle' : 
-                 type === 'error' ? 'times-circle' : 'info-circle';
-    
-    toast.innerHTML = `
-        <i class="fas fa-${icon}"></i>
-        <span class="toast-message">${message}</span>
-    `;
-    
-    container.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.animation = 'slideOutRight 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
-
-// ===================================
-// EXPORTAR/IMPORTAR DATOS
-// ===================================
-function exportJSON() {
-    const dataStr = JSON.stringify(allData, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `fraud-detection-data-${Date.now()}.json`;
-    a.click();
-    showToast('Datos exportados exitosamente', 'success');
-}
-
-function exportCSV() {
-    let csv = 'Tipo,ID,Fecha,Descripción,Detalles\n';
-    
-    ['incidentes', 'problemas', 'cambios', 'riesgos', 'hitos', 'lecciones'].forEach(type => {
-        (allData[type] || []).forEach(item => {
-            const details = Object.values(item).slice(2).join(' | ');
-            csv += `${type},${item.id},${item.fecha || item.fechaPlanificada},"${item.descripcion || item.situacion}","${details}"\n`;
-        });
-    });
-    
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `fraud-detection-data-${Date.now()}.csv`;
-    a.click();
-    showToast('CSV exportado exitosamente', 'success');
-}
-
-function importJSON(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            const imported = JSON.parse(e.target.result);
-            allData = imported;
-            saveDataToStorage();
+        // Cargar datos de ejemplo
+        function loadSampleData() {
+            if (!confirm('¿Desea cargar los datos de ejemplo? Esto agregará 20 registros nuevos.')) {
+                return;
+            }
+            
+            for (let i = 0; i < 20; i++) {
+                const types = ['incidente', 'problema', 'cambio', 'riesgo', 'hito', 'leccion'];
+                const type = types[i % types.length];
+                const record = createRandomRecord(type);
+                allData[type + 's'].push(record);
+            }
+            
             renderAllTables();
-            updateAllCharts();
+            updateCharts();
             updateMetrics();
-            updateProjectProgress();
-            showToast('Datos importados exitosamente', 'success');
-        } catch (error) {
-            showToast('Error al importar datos: archivo inválido', 'error');
+            updateProgress();
+            showToast('20 registros de ejemplo cargados exitosamente', 'success');
         }
-    };
-    reader.readAsText(file);
-}
 
-// ===================================
-// DATOS DE EJEMPLO
-// ===================================
-function loadSampleData() {
-    if (!confirm('¿Desea cargar los datos de ejemplo? Esto agregará 20 registros nuevos.')) {
-        return;
-    }
-    
-    for (let i = 0; i < 20; i++) {
-        const types = ['incidente', 'problema', 'cambio', 'riesgo', 'hito', 'leccion'];
-        const type = types[i % types.length];
-        const record = createRandomRecord(type);
-        addRecord(type, record, false);
-    }
-    
-    showToast('20 registros de ejemplo cargados exitosamente', 'success');
-}
+        // Limpiar datos
+        function clearAllData() {
+            if (!confirm('¿Está seguro de eliminar TODOS los datos? Esta acción no se puede deshacer.')) {
+                return;
+            }
+            
+            allData = {
+                incidentes: [],
+                problemas: [],
+                cambios: [],
+                riesgos: [],
+                hitos: [],
+                lecciones: [],
+                conocimientos: []
+            };
+            
+            projectDay = 1;
+            document.getElementById('projectDay').textContent = '1';
+            
+            renderAllTables();
+            updateCharts();
+            updateMetrics();
+            updateProgress();
+            showToast('Todos los datos han sido eliminados', 'warning');
+        }
 
-function clearAllData() {
-    if (!confirm('¿Está seguro de eliminar TODOS los datos? Esta acción no se puede deshacer.')) {
-        return;
-    }
-    
-    allData = {
-        incidentes: [],
-        problemas: [],
-        cambios: [],
-        riesgos: [],
-        hitos: [],
-        lecciones: [],
-        conocimientos: []
-    };
-    
-    projectDay = 1;
-    document.getElementById('projectDay').textContent = '1';
-    
-    saveDataToStorage();
-    renderAllTables();
-    updateAllCharts();
-    updateMetrics();
-    updateProjectProgress();
-    
-    showToast('Todos los datos han sido eliminados', 'warning');
-}
+        // Exportar JSON
+        function exportJSON() {
+            const dataStr = JSON.stringify(allData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fraud-detection-data-${Date.now()}.json`;
+            a.click();
+            showToast('Datos exportados exitosamente', 'success');
+        }
 
-// ===================================
-// INICIALIZACIÓN ADICIONAL
-// ===================================
-document.getElementById('formModal').addEventListener('click', (e) => {
-    if (e.target.id === 'formModal') {
-        closeModal();
-    }
-});
+        // Renderizar todas las tablas
+        function renderAllTables() {
+            renderTable('incidentes');
+            renderTable('problemas');
+            renderTable('cambios');
+            renderTable('riesgos');
+            renderTable('hitos');
+            renderTable('lecciones');
+            renderKnowledge();
+        }
 
-document.querySelector('.modal-content').addEventListener('click', (e) => {
-    e.stopPropagation();
-});
+        // Navegación
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
 
-document.getElementById('riskDetailModal').addEventListener('click', (e) => {
-    if (e.target.id === 'riskDetailModal') {
-        closeRiskDetail();
-    }
-});
+        document.querySelectorAll('.sub-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const parent = tab.dataset.parent;
+                document.querySelectorAll(`[data-parent="${parent}"]`).forEach(t => t.classList.remove('active'));
+                document.querySelectorAll(`#${parent} .sub-content`).forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.subtab).classList.add('active');
+            });
+        });
 
-console.log('%c🚀 Sistema de Detección de Fraudes con IA - ITIL 4 + PMBOK 7', 'color: #003087; font-size: 20px; font-weight: bold;');
-console.log('%c✅ Aplicación inicializada correctamente', 'color: #28a745; font-size: 14px;');
-console.log('%c📊 Simulación automática activada (cada 5 segundos)', 'color: #0055ff; font-size: 14px;');
+        // Toggle simulación
+        document.getElementById('simulationToggle').addEventListener('click', () => {
+            simulationActive = !simulationActive;
+            const btn = document.getElementById('simulationToggle');
+            const icon = document.getElementById('simIcon');
+            const text = document.getElementById('simText');
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            
+            if (simulationActive) {
+                icon.textContent = '⏸️';
+                text.textContent = 'Pausar Simulación';
+                btn.classList.remove('paused');
+                indicator.classList.remove('inactive');
+                statusText.textContent = 'Simulación activa - Nuevo registro cada 5 segundos';
+            } else {
+                icon.textContent = '▶️';
+                text.textContent = 'Reanudar Simulación';
+                btn.classList.add('paused');
+                indicator.classList.add('inactive');
+                statusText.textContent = 'Simulación pausada';
+            }
+        });
+
+        // Toggle tema
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const btn = document.getElementById('themeToggle');
+            btn.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        });
+
+        // Actualizar fecha y hora
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('currentDateTime').textContent = 
+                now.toLocaleDateString('es-ES', options);
+        }
+
+        // Event listeners para botones
+        document.getElementById('btnCloseModal').addEventListener('click', closeRiskDetail);
+        document.getElementById('btnExportJSON').addEventListener('click', exportJSON);
+        document.getElementById('btnLoadSample').addEventListener('click', loadSampleData);
+        document.getElementById('btnClearAll').addEventListener('click', clearAllData);
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('riskDetailModal').addEventListener('click', (e) => {
+            if (e.target.id === 'riskDetailModal') {
+                closeRiskDetail();
+            }
+        });
+
+        // Búsqueda en incidentes
+        document.getElementById('searchIncidentes').addEventListener('keyup', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#incidentesBody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Inicialización
+        function init() {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            
+            // Contador de días
+            dayInterval = setInterval(() => {
+                projectDay++;
+                document.getElementById('projectDay').textContent = projectDay;
+            }, 10000);
+            
+            // Simulación automática
+            simulationInterval = setInterval(() => {
+                if (simulationActive) {
+                    generateRandomRecord();
+                }
+            }, 5000);
+            
+            // Inicializar gráficos
+            setTimeout(() => {
+                initCharts();
+                renderAllTables();
+                updateMetrics();
+                updateProgress();
+            }, 100);
+        }
+
+        // Ejecutar al cargar
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+        console.log('🚀 Sistema de Detección de Fraudes con IA - ITIL 4 + PMBOK 7');
+        console.log('✅ Aplicación inicializada correctamente');
+        console.log('📊 Simulación automática activada (cada 5 segundos)');
     </script>
 </body>
 </html>
